@@ -23,6 +23,10 @@
 
         include "components/user.page.php";
 
+    } elseif ($_GET['menu']=='hitungharga') {
+
+        include "components/hitungharga.page.php";
+
     } elseif ($_GET['menu']=='setting') {
 
         include "components/setting.page.php";

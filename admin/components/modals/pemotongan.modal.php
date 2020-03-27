@@ -39,7 +39,7 @@
               <a href="" target="_blank" class="btn btn-default btn-jahit">Download Form Jahit</a>
               <button class="btn btn-primary btn-proses">Selesai Potong & Jahit</button>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-12 col-table">
               <table id="listbarang" class="table table-bordered table-striped">
                 <thead>
                   <tr>

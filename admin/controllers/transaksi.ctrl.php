@@ -532,6 +532,30 @@ if($_GET['ket']=='submit-booking'){
 	$b="INSERT into laporan_omset(laporan_omset_tanggal,laporan_omset_bulan,laporan_omset_pengukuran_id,laporan_omset_jumlah)values('$tgl','$bln','$id','$sisa')";
 	mysqli_query($con,$b);
 
+} elseif($_GET['ket']=='cekharga') {
+	$namajenis = $_POST['namajenis'];
+	$namabahan = $_POST['namabahan'];
+	$namamodel = $_POST['namamodel'];
+	$jenis = $_POST['jenis']; 
+	$model = $_POST['model'];
+	$bahan =  $_POST['bahan'];
+	$hargabahan = 0;
+	$hargabox = 0; 
+	$tinggi = $_POST['tinggi'];
+	$lebar = $_POST['lebar'];
+	$volume = 0;
+	$jumlah = 1;
+	$pilihkualitas = "Premium";
+
+	$hasilhitungharga = hitungHarga($jenis,$namajenis,$model,$namamodel,$bahan,$namabahan,$tinggi,$lebar,$volume,$jumlah,$hargabahan,$hargabox,$pilihkualitas);
+	
+
+	$dataarray = array();
+	$row_array['harga'] = $hasilhitungharga;
+    array_push($dataarray,$row_array);
+
+	echo json_encode($dataarray);
+
 } elseif($_GET['ket']=='tes') {
 	$namajenis = 'Roller Blind';
 	$namabahan = 'Superior Dim Out';

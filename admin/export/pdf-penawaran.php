@@ -171,8 +171,8 @@ $html = '
           </tr>
         </table>
     ';
-echo $html;
-/*
+//echo $html;
+
 require_once '../../include/dompdf/lib/html5lib/Parser.php';
 require_once '../../include/dompdf/lib/php-font-lib/src/FontLib/Autoloader.php';
 require_once '../../include/dompdf/lib/php-svg-lib/src/autoload.php';
@@ -203,6 +203,3 @@ $dompdf->stream("formpenawaran-".$tgl."-".$pelanggan.".pdf", array("Attachment"=
     window.close();
   },1000)
 </script>
-
-*/
-?>

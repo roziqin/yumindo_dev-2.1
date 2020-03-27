@@ -51,7 +51,7 @@
 				    } elseif ($_SESSION['role']=="potong-jahit") {
 				    ?>
 					    <li class="nav-item">
-					      <a class="nav-link waves-light" id="pemotongan">Pemotongan & jahit</a>
+					      <a class="nav-link waves-light" id="pemotongan">Potong & jahit</a>
 					    </li>
 					    <li class="nav-item">
 					      <a class="nav-link waves-light" id="finishing">Finishing</a>

@@ -627,6 +627,9 @@ main.transaksi {
 		padding: 0;
 		margin: 0;
 	}
+	.modal-dialog .modal-content .modal-header {
+		padding-top: 60px;
+	}
 	.col-table {
 		overflow: auto;
 	}
@@ -682,6 +685,13 @@ main.transaksi {
 	}
 	#sidenav-overlay {
 		z-index: 0;
+	}
+	.modal-dialog.orderbahan {
+	    max-width: 100%;
+	    left: 0;
+	}
+	canvas.canvas {
+		width: 100%;
 	}
 }
 

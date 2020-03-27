@@ -28,7 +28,10 @@
             "deferRender": true,
             "columns": [
                 { "data": "pengukuran_tanggal" },
-                { "data": "name" },
+                { "render": function(data, type, full){
+                   return '<a class="btn-edit" data-toggle="modal" data-target="#modalpemasangan" data-id="' + full['pengukuran_id'] + '" title="Detail">' + full['name'] + '</a>';
+                    }
+                },
                 { "data": "pengukuran_status" },
                 { "width": "150px", "render": function(data, type, full){
                    return '<a class="btn-floating btn-sm btn-default mr-2 btn-edit" data-toggle="modal" data-target="#modalpemasangan" data-id="' + full['pengukuran_id'] + '" title="Detail"><i class="fas fa-pen"></i></a>';

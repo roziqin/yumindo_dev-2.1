@@ -47,6 +47,9 @@
 
 				    <?php
 				    } ?>
+					<li class="menu-item">
+				        <a class="waves-effect grey-text" href="?menu=hitungharga" data-toggle="tooltip" title="Hitung Harga"><i class="sv-slim-icon fas fa-calculator"></i>Hitung Harga</a>
+					</li>
 			        <li class="menu-item">
 			        	<a class="waves-effect grey-text" href="?logout=1" data-toggle="tooltip" title="Logout"><i class="sv-slim-icon fas fa-sign-out-alt"></i>Logout</a>
 			        </li>

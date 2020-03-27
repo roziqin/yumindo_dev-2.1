@@ -1,4 +1,4 @@
-<?php $con = mysqli_connect("localhost","root","","gudang_yumindo"); ?>
+<?php $con = mysqli_connect("localhost","root","","yumindon_new"); ?>
 <!-------------- Modal tambah kategori -------------->
 
 <div class="modal fade" id="modaluser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -29,23 +29,10 @@
                 <select class="mdb-select md-form" id="defaultForm-roles" name="ip-roles">
                     <option value="" disabled selected>Pilih Role</option>
                 <?php
-                  $sql="SELECT * from roles";
+                  $sql="SELECT * from roles_lain";
                   $result=mysqli_query($con,$sql);
                   while ($data1=mysqli_fetch_array($result,MYSQLI_ASSOC)) {
-                      echo "<option value='$data1[roles_id]'>$data1[display_name]</option>";
-                  }
-                ?>
-                </select>
-            </div>
-            <div class="md-form mb-0">
-                <select class="mdb-select md-form" id="defaultForm-cabang" name="ip-cabang">
-                    <option value="" disabled selected>Pilih Cabang</option>
-                <?php
-                  $sql="SELECT * from cabang";
-                  $result=mysqli_query($con,$sql);
-                  while ($data1=mysqli_fetch_array($result,MYSQLI_ASSOC)) {
-                   
-                      echo "<option value='$data1[cabang_id]'>$data1[cabang_nama]</option>";
+                      echo "<option value='$data1[roles_id]'>$data1[roles_display]</option>";
                   }
                 ?>
                 </select>
@@ -81,7 +68,10 @@
             console.log("sukses")
             $('#table-user').DataTable().ajax.reload();
             $("#modaluser #defaultForm-nama").val('');
-            $("#modaluser #defaultForm-jenis").val('');
+            $("#modaluser #defaultForm-id").val('');
+            $("#modaluser #defaultForm-user").val('');
+            $("#modaluser #defaultForm-password").val('');
+            $("#modaluser #defaultForm-roles").val('');
           }
         });
       });   
@@ -97,7 +87,10 @@
             console.log("sukses edit")
             $('#table-user').DataTable().ajax.reload();
             $("#modaluser #defaultForm-nama").val('');
-            $("#modaluser #defaultForm-jenis").val('');
+            $("#modaluser #defaultForm-id").val('');
+            $("#modaluser #defaultForm-user").val('');
+            $("#modaluser #defaultForm-password").val('');
+            $("#modaluser #defaultForm-roles").val('');
           }
         });
       }); 

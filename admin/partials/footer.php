@@ -5,7 +5,6 @@
 <script type="text/javascript" src="../assets/js/modules/chart.js"></script>
 <script type="text/javascript" src="../assets/js/compiled.js?asu"></script>
 <script type="text/javascript" src="../assets/js/moments.js?aa"></script>
-<script type="text/javascript" src="../assets/js/ajax.js?aas"></script>
 <script type="text/javascript" src="../assets/js/addons/datatables.min.js"></script>
 <script type="text/javascript" src="../assets/js/jquery-confirm.min.js"></script>
 <script type="text/javascript" src="../assets/js/jquery.price_format.2.0.js"></script>
@@ -13,7 +12,34 @@
 <script type="text/javascript" src="../assets/js/signature_pad.min.js"></script>
 
 
-<script type="text/javascript"> 
+<script type="text/javascript">
+  $('ul.nav li.nav-item a').on('click',function(e){
+      $('ul.nav li.nav-item a').removeClass("active");
+      $(this).addClass("active");
+  }); 
+
+  function splitAngka(angka) {
+    var text_line = angka.split(".");
+    var length = text_line.length;
+
+    if (length==1) {
+      bayar=text_line[0];
+
+    } else if (length==2) {
+      bayar=text_line[0]+""+text_line[1];
+
+    } else if (length==3) {
+      bayar=text_line[0]+""+text_line[1]+""+text_line[2];
+
+    } else if (length==4) {
+      bayar=text_line[0]+""+text_line[1]+""+text_line[2]+""+text_line[3];
+
+    } else if (length==5) {
+      bayar=text_line[0]+""+text_line[1]+""+text_line[2]+""+text_line[3]+""+text_line[4];
+
+    }
+    return bayar;
+  }
   /* Fungsi formatRupiah */
   function formatRupiah(angka, prefix){
     var number_string = angka.replace(/[^,\d]/g, '').toString(),

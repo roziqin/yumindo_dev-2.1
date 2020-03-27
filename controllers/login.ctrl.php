@@ -19,12 +19,12 @@
 		// username and password sent from Form
 		$myusername=$_POST['username'];
 		$mypassword=md5($_POST['password']);
-		$sql="select * from users, roles where role=roles_id and username = '$myusername' and password = '$mypassword' ";
+		$sql="SELECT * from users_lain, roles_lain where role=roles_id and username = '$myusername' and password = '$mypassword' ";
 		$result=mysqli_query($con,$sql);
 		$data=mysqli_fetch_array($result,MYSQLI_ASSOC);
 		$a = $data['id'];
-		$ddd = $data['display_name'];
-		
+		$ddd = $data['name'];
+
 
 		
 		if($a!='') {
@@ -35,10 +35,15 @@
 			$_SESSION['login']		= 1;
 			$_SESSION['namauser']     = $data['username'];
 			$_SESSION['passuser']     = $data['password'];
-			$_SESSION['cabang']     = $data['cabang'];
-			$_SESSION['role']		  = $data['roles_name'];
+			$_SESSION['role']		  = $data['roles_nama'];
 			$_SESSION['order_type']		  = 'null';
-			echo 'ok';
+			$_SESSION['print']		  = 'tidak';
+
+			if ($data['roles_nama']=="pengukur" || $data['roles_nama']=="potong-jahit") {
+				echo 'transaksi';
+			} else {
+				echo 'home';
+			}
 		} else {
 			echo 'Username atau Password Salah !';
 		}

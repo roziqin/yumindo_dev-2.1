@@ -30,8 +30,6 @@ else{
 	$d=mysqli_fetch_assoc($r);
 	$pajakresto = $d['pengaturan_pajak'];
 	$pajakservice = $d['pengaturan_service'];
-	$pajakonline = $d['pengaturan_pajak_online'];
-	$pajakpembulatan = $d['pengaturan_pajak_pembulatan'];
 
 
 ?>
@@ -41,11 +39,12 @@ else{
 	<?php include 'partials/head.php'; ?>
 </head>
 <body  class="fixed-sn mdb-skin-custom nav-slim">
-
+	<!--
 	<input type="hidden" id="ip-pajakresto" value="<?php echo $pajakresto; ?>" name="pajakresto"> 
 	<input type="hidden" id="ip-pajakservice" value="<?php echo $pajakservice; ?>" name="pajakservice">
 	<input type="hidden" id="ip-pajakonline" value="<?php echo $pajakonline; ?>" name="pajakonline">
 	<input type="hidden" id="ip-pajakpembulatan" value="<?php echo $pajakpembulatan; ?>" name="pajakpembulatan">
+	-->
 	<?php include 'partials/sidebar.php'; ?>
 	<?php include 'partials/content.php'; ?>
 	

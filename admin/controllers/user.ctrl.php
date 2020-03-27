@@ -11,9 +11,8 @@ if($_GET['ket']=='submit-user'){
 	$user = $_POST['ip-user'];
 	$password = md5($_POST['ip-password']);
 	$roles = $_POST['ip-roles'];
-	$cabang = $_POST['ip-cabang'];
 
-	$sql = "INSERT into users(name,username,password,role,cabang,remember_token)values('$nama','$user','$password','$roles','$cabang','0')";
+	$sql = "INSERT into users_lain(name,username,password,role,remember_token)values('$nama','$user','$password','$roles','0')";
 
 	mysqli_query($con,$sql);
 	
@@ -25,12 +24,11 @@ if($_GET['ket']=='submit-user'){
 	$user = $_POST['ip-user'];
 	$password = md5($_POST['ip-password']);
 	$roles = $_POST['ip-roles'];
-	$cabang = $_POST['ip-cabang'];
 	
 	if ($_POST['ip-password']!='') {
-		$sql="UPDATE users set name='$nama',username='$user',password='$password',role='$roles',cabang='$cabang' where id='$id'";
+		$sql="UPDATE users_lain set name='$nama',username='$user',password='$password',role='$roles' where id='$id'";
 	} else {
-		$sql="UPDATE users set name='$nama',username='$user',role='$roles',cabang='$cabang' where id='$id'";
+		$sql="UPDATE users_lain set name='$nama',username='$user',role='$roles' where id='$id'";
 	}
 	mysqli_query($con,$sql);
 	
@@ -38,7 +36,7 @@ if($_GET['ket']=='submit-user'){
 	$array_datas = array();
 	
 	$id = $_POST['id'];
-	$sql="DELETE from users where id='$id'";
+	$sql="DELETE from users_lain where id='$id'";
 	if (!mysqli_query($con,$sql)) {
 		$array_datas[] = ["gagal"];
 	}else{

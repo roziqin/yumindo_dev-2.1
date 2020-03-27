@@ -10,7 +10,7 @@
 				      <a class="nav-link waves-light active show" id="user">User</a>
 				    </li>
 				    <li class="nav-item">
-				      <a class="nav-link waves-light" id="cabang">Cabang</a>
+				      <a class="nav-link waves-light" id="member">Pelanggan</a>
 				    </li>
 				</ul>
 			</div>
@@ -20,9 +20,13 @@
 	<main class="pt-4 produk pl-md-3 pr-md-3 mr-0">
 		<div class="main-wrapper">
 		    <div class="container-fluid">
-				<div class="row mt-2">
-					<div class="col-md-12 container__load fadeIn animated">
-						
+		    	<div class="card">
+		    		<div class="card-body">
+						<div class="row mt-2">
+							<div class="col-md-12 container__load fadeIn animated">
+								
+							</div>
+						</div>
 					</div>
 				</div>
 		    </div>
@@ -39,8 +43,8 @@
 				var menu = $(this).attr('id');
 				if(menu == "user"){
 					$('.container__load').load('components/content/user.content.php');						
-				}else if(menu == "cabang"){
-					$('.container__load').load('components/content/cabang.content.php');						
+				}else if(menu == "member"){
+					$('.container__load').load('components/content/member.content.php');						
 				}
 			});
 	 		

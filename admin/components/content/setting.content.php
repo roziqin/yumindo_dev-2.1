@@ -26,72 +26,46 @@
                 </div>
               </div>
             </div>
-
-            <div class="md-form mb-0 hidden">
-                <select class="mdb-select md-form" id="pajak10" name="ip-pajak">
-                    <option value="" disabled selected>Set Pajak 10%</option>
-                    <option value="0">Tidak</option>
-                    <option value="1">Ya</option>
-                </select>
-            </div>
-            <div class="md-form mb-0 hidden">
-                <select class="mdb-select md-form" id="pajakonline" name="ip-pajak-online">
-                    <option value="" disabled selected>Set Pajak online 10%</option>
-                    <option value="0">Tidak</option>
-                    <option value="1">Ya</option>
-                </select>
-            </div>
-            <div class="md-form mb-0 hidden">
-              <input type="text" id="defaultForm-service" class="form-control validate mb-3" name="ip-service">
-              <label for="defaultForm-service">Pajak Service %</label>
-            </div>
-            <div class="md-form mb-0 hidden">
-                <select class="mdb-select md-form" id="pajakpembulatan" name="ip-pajak-pembulatan">
-                    <option value="" disabled selected>Set Pembulatan Pajak</option>
-                    <option value="0">Tidak</option>
-                    <option value="1">Ya</option>
-                </select>
-            </div>
-            <!--
-            <div class="row">
-              <div class="col-md-3">
-                <div class="md-form mb-0">
-                    <select class="mdb-select md-form" id="printchecklist" name="ip-print-checklist">
-                        <option value="" disabled selected>Print Checklist</option>
-                        <option value="0">Tidak</option>
-                        <option value="1">Ya</option>
-                    </select>
+            <div class="md-form mb-0">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-premium" class="form-control validate mb-3" name="ip-kualitas-premium">
+                    <label for="defaultForm-kualitas-premium">Premium</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <div class="md-form mb-0">
-                    <select class="mdb-select md-form" id="printkitchen" name="ip-print-kitchen">
-                        <option value="" disabled selected>Print Kitchen</option>
-                        <option value="0">Tidak</option>
-                        <option value="1">Ya</option>
-                    </select>
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-gold" class="form-control validate mb-3" name="ip-kualitas-gold">
+                    <label for="defaultForm-kualitas-gold">Gold</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <div class="md-form mb-0">
-                    <select class="mdb-select md-form" id="printsnack" name="ip-print-snack">
-                        <option value="" disabled selected>Print Snack</option>
-                        <option value="0">Tidak</option>
-                        <option value="1">Ya</option>
-                    </select>
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-silver" class="form-control validate mb-3" name="ip-kualitas-silver">
+                    <label for="defaultForm-kualitas-silver">Silver</label>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <div class="md-form mb-0">
-                    <select class="mdb-select md-form" id="printbar" name="ip-print-bar">
-                        <option value="" disabled selected>Print Bar</option>
-                        <option value="0">Tidak</option>
-                        <option value="1">Ya</option>
-                    </select>
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-vitraspremium" class="form-control validate mb-3" name="ip-kualitas-vitraspremium">
+                    <label for="defaultForm-kualitas-vitraspremium">Vitras Premium</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-vitrasgold" class="form-control validate mb-3" name="ip-kualitas-vitrasgold">
+                    <label for="defaultForm-kualitas-vitrasgold">Vitras Gold</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="md-form mb-0">
+                    <input type="text" id="defaultForm-kualitas-vitrassilver" class="form-control validate mb-3" name="ip-kualitas-vitrassilver">
+                    <label for="defaultForm-kualitas-vitrassilver">Vitras Silver</label>
+                  </div>
                 </div>
               </div>
             </div>
-            -->
           </div>
           <div class="col-md-4">
             <img src="" class="img-fluid img-logo" alt="Responsive image">
@@ -119,12 +93,12 @@
               $(".img-logo").attr("src", "../assets/img/"+data[0].pengaturan_logo);
               $("#defaultForm-service").val(data[0].pengaturan_service);
               $("#pajak10").val(data[0].pengaturan_pajak);
-              $("#pajakonline").val(data[0].pengaturan_pajak_online);
-              $("#pajakpembulatan").val(data[0].pengaturan_pajak_pembulatan);
-              $("#printchecklist").val(data[0].pengaturan_print_checklist);
-              $("#printkitchen").val(data[0].pengaturan_print_kitchen);
-              $("#printsnack").val(data[0].pengaturan_print_snack);
-              $("#printbar").val(data[0].pengaturan_print_bar);
+              $("#defaultForm-kualitas-premium").val(data[0].pengaturan_kualitas_premium);
+              $("#defaultForm-kualitas-gold").val(data[0].pengaturan_kualitas_gold);
+              $("#defaultForm-kualitas-silver").val(data[0].pengaturan_kualitas_silver);
+              $("#defaultForm-kualitas-vitraspremium").val(data[0].pengaturan_kualitas_vitras_premium);
+              $("#defaultForm-kualitas-vitrasgold").val(data[0].pengaturan_kualitas_vitras_gold);
+              $("#defaultForm-kualitas-vitrassilver").val(data[0].pengaturan_kualitas_vitras_silver);
 
           }
       });
@@ -139,12 +113,12 @@
         data.append('ip-service', $("#defaultForm-service").val());
         data.append('ip-textlogo', $("#textlogo").val());
         data.append('ip-pajak', $("#pajak10").val());
-        data.append('ip-pajakonline', $("#pajakonline").val());
-        data.append('ip-pajak-pembulatan', $("#pajakpembulatan").val());
-        data.append('ip-print-checklist', $("#printchecklist").val());
-        data.append('ip-print-kitchen', $("#printkitchen").val());
-        data.append('ip-print-snack', $("#printsnack").val());
-        data.append('ip-print-bar', $("#printbar").val());
+        data.append('ip-kualitas-premium', $("#defaultForm-kualitas-premium").val());
+        data.append('ip-kualitas-gold', $("#defaultForm-kualitas-gold").val());
+        data.append('ip-kualitas-silver', $("#defaultForm-kualitas-silver").val());
+        data.append('ip-kualitas-vitraspremium', $("#defaultForm-kualitas-vitraspremium").val());
+        data.append('ip-kualitas-vitrasgold', $("#defaultForm-kualitas-vitrasgold").val());
+        data.append('ip-kualitas-vitrassilver', $("#defaultForm-kualitas-vitrassilver").val());
         data.append('inputfile', $("#logo")[0].files[0]);
         console.log(data);
      

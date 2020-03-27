@@ -7,29 +7,17 @@
 
         include "components/order.page.php";
 
-    }  elseif ($_GET['menu']=='stok') {
+    } elseif ($_GET['menu']=='transaksi') {
 
-        include "components/stok.page.php";
+        include "components/transaksi.page.php";
 
-    } elseif ($_GET['menu']=='produk') {
+    }  elseif ($_GET['menu']=='produk') {
 
         include "components/produk.page.php";
 
     } elseif ($_GET['menu']=='laporan') {
 
         include "components/laporan.page.php";
-
-    } elseif ($_GET['menu']=='laporancabang') {
-
-        include "components/laporan.page.php";
-
-    } elseif ($_GET['menu']=='logs') {
-
-        include "components/logpesanan.page.php";
-
-    } elseif ($_GET['menu']=='konfirmasi') {
-
-        include "components/konfpesanan.page.php";
 
     } elseif ($_GET['menu']=='user') {
 

@@ -17,18 +17,16 @@
 		    <!-- Side navigation links -->
 		    <li>
 		      	<ul class="collapsible collapsible-accordion">
+		      		<?php if ($_SESSION['role']=="admin" || $_SESSION['role']=="owner") {
+				    ?>
 			        <li class="menu-item">
 				        <a class="waves-effect grey-text" href="?menu=home" data-toggle="tooltip" title="Dashboard"><i class="sv-slim-icon fas fa-home"></i>Dashboard</a>
 					</li>
-		      		<?php if ($_SESSION['role']=="admin" || $_SESSION['role']=="administrator") { ?>
 					<li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=konfirmasi" data-toggle="tooltip" title="Konfirmasi Pemesanan"><i class="sv-slim-icon fas fa-shopping-basket"></i>Pemesanan</a>
+				        <a class="waves-effect grey-text" href="?menu=transaksi" data-toggle="tooltip" title="Transaksi"><i class="sv-slim-icon fas fa-shopping-basket"></i>Transaksi</a>
 					</li>
 					<li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=produk" data-toggle="tooltip" title="Produk"><i class="sv-slim-icon fas fa-box-open"></i>Produk</a>
-			        </li>
-					<li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=stok" data-toggle="tooltip" title="Stok"><i class="sv-slim-icon fas fa-clipboard-list"></i>Stok</a>
+				        <a class="waves-effect grey-text" href="?menu=produk" data-toggle="tooltip" title="Barang"><i class="sv-slim-icon fas fa-box-open"></i>Barang</a>
 			        </li>
 			        <li class="menu-item">
 				        <a class="waves-effect grey-text" href="?menu=laporan" data-toggle="tooltip" title="Laporan"><i class="sv-slim-icon fas fa-chart-bar"></i>Laporan</a>
@@ -39,21 +37,16 @@
 					<li class="menu-item">
 				        <a class="waves-effect grey-text" href="?menu=setting" data-toggle="tooltip" title="Setting"><i class="sv-slim-icon fas fa-tools"></i>Setting</a>
 			        </li>
-					<?php } ?>
-		      		<?php if ($_SESSION['role']=="md") { ?>
+
+				    <?php
+				    } elseif ($_SESSION['role']=="pengukur" || $_SESSION['role']=="potong-jahit") {
+				    ?>
 					<li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=order" data-toggle="tooltip" title="Order"><i class="sv-slim-icon fas fa-shopping-basket"></i>Order</a>
+				        <a class="waves-effect grey-text" href="?menu=transaksi" data-toggle="tooltip" title="Transaksi"><i class="sv-slim-icon fas fa-shopping-basket"></i>Transaksi</a>
 					</li>
-			        <li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=logs" data-toggle="tooltip" title="Log Pemesanan"><i class="sv-slim-icon fas fa-database"></i>Log Pemesanan</a>
-			        </li>
-					<li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=stok" data-toggle="tooltip" title="Stok"><i class="sv-slim-icon fas fa-clipboard-list"></i>Stok</a>
-			        </li>
-			        <li class="menu-item">
-				        <a class="waves-effect grey-text" href="?menu=laporancabang" data-toggle="tooltip" title="Laporan"><i class="sv-slim-icon fas fa-chart-bar"></i>Laporan</a>
-			        </li>
-					<?php } ?>
+
+				    <?php
+				    } ?>
 			        <li class="menu-item">
 			        	<a class="waves-effect grey-text" href="?logout=1" data-toggle="tooltip" title="Logout"><i class="sv-slim-icon fas fa-sign-out-alt"></i>Logout</a>
 			        </li>

@@ -9,9 +9,13 @@
 	<main class="pt-4 setting pl-md-3 pr-md-3 mr-0">
 		<div class="main-wrapper">
 		    <div class="container-fluid">
-				<div class="row mt-2 justify-content-md-center">
-					<div class="col-md-6 container__load fadeIn animated">
-						
+		    	<div class="card">
+		    		<div class="card-body">
+						<div class="row mt-2 justify-content-md-center">
+							<div class="col-md-6 container__load fadeIn animated">
+								
+							</div>
+						</div>
 					</div>
 				</div>
 		    </div>

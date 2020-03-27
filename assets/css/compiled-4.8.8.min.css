@@ -64,7 +64,7 @@ body {
     line-height: 1.5;
     color: #212529;
     text-align: left;
-    background-color: #fff
+    background-color: #eee
 }
 
 [tabindex="-1"]:focus {
@@ -443,6 +443,10 @@ h6 {
     font-size: 3.5rem;
     font-weight: 300;
     line-height: 1.2
+}
+
+.clear {
+    clear: both;
 }
 
 hr {
@@ -1115,7 +1119,7 @@ pre code {
         flex: 0 0 16.666667%;
         max-width: 16.666667%
     }
-    .col-md-2 {
+    .col-md-21 {
         -ms-flex: 0 0 12.5%;
         flex: 0 0 12.5%;
         max-width: 12.5%;
@@ -41700,4 +41704,8 @@ form.ajax-auth {
 .fas {
     font-family: 'Font Awesome 5 Solid';
     font-weight: 900
+}
+
+table.custom p {
+    margin-bottom: 0px;
 }

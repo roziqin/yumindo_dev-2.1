@@ -1,3 +1,8 @@
+html,
+body,
+.view {
+  	height: 100%;
+}
 body {
 	padding-right: 0px!important;
 }
@@ -9,7 +14,6 @@ body.modal-open {
 .clear {
 	clear: both;
 }
-
 .hidden {
 	display: none;
 }
@@ -246,6 +250,11 @@ table.dashboard td:last-child {
 
 table.table thead th {
 	text-transform: capitalize;
+	padding-top: .6rem;
+    padding-bottom: .5rem;
+    font-size: 13px;
+    padding-left: .5rem;
+    padding-right: .5rem;
 }
 
 table.dataTable thead .sorting:after, table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_asc_disabled:before, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc_disabled:after, table.dataTable thead .sorting_desc_disabled:before {
@@ -272,7 +281,13 @@ table#table-omset td:nth-child(1) {
 	text-align: left;
 }
 
+.select-other {
+	margin-top: 2px;
+}
 
+.md-form .form-control:disabled {
+	background-color: rgba(0,0,0,.02);
+}
 /*---------------------- Transaksi ----------------------*/
 main.transaksi {
 	position: absolute;
@@ -580,9 +595,20 @@ main.transaksi {
 .mdb-skin-custom a.button-collapse {
 	color: #FFF;
 }
+
+.modal-dialog.orderbahan {
+	max-width: calc(100% - 80px);
+	left: 30px;
+}
+
+@media (max-width: 1440px) {
+
+}
+
 @media (max-width: 767px) {
 	header {
 		position: relative;
+		z-index: 1;
 	}
 	.header-content {
 	    padding-left: 70px;
@@ -591,7 +617,7 @@ main.transaksi {
 	}
 	.header-admin {
 		position: relative;
-		z-index: -1;
+		z-index: 0;
 	}
 	.mobile-display {
 		display: block;
@@ -651,4 +677,16 @@ main.transaksi {
 		width: calc(100% - 120px);
 	    text-align: right;
 	}
+	.dataTables_wrapper {
+		overflow-x: auto;
+	}
+	#sidenav-overlay {
+		z-index: 0;
+	}
+}
+
+ul.nav .nav-item a.nav-link.active {
+    margin-bottom: -29px;
+    border-bottom: 3px solid #ccc;
+    background-color: rgba(0,0,0,.1);
 }

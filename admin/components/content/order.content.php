@@ -1,849 +1,551 @@
 <?php 
 session_start();
-$con = mysqli_connect("localhost","root","","gudang_yumindo");
+$con = mysqli_connect("localhost","root","","yumindon_new");
 include '../../../include/format_rupiah.php';
-
+include '../modals/order.modal.php';
 $kond = $_GET['kond'];
 $userid = $_SESSION['login_user'];
-
-$q= "SELECT * from member_temp where member_temp_user_id='$userid' ORDER BY member_temp_id DESC LIMIT 1";
-$r=mysqli_query($con, $q);
-$d=mysqli_fetch_assoc($r);
-
-if ($kond=='home' || $kond=='') { ?>
-    <div class="classic-tabs">
-        <ul class="nav tabs-white border-bottom" id="myClassicTab" role="tablist">
-            <?php
-                $n=0;
-                $sql="SELECT * from kategori ORDER BY kategori_id";
-                $query=mysqli_query($con, $sql);
-                while ($data1=mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-                    if ($n==0) {
-                        $ket = 'active show';
-                        $ket1 = 'true';
-                        $ket2 = 'ml-0';
-                    } else {
-                        $ket = '';
-                        $ket1 = 'false';
-                        $ket2 = '';
-
-                    }
-                ?>
-                    <li class="nav-item <?php echo $ket2; ?>">
-                        <a class="nav-link  waves-light <?php echo $ket; ?>" id="profile-tab-classic" data-toggle="tab" href="#<?php echo $data1['kategori_slug']; ?>"
-                        role="tab" aria-controls="<?php echo $data1['kategori_slug']; ?>" aria-selected="<?php echo $ket1; ?>"><?php echo $data1['kategori_nama']; ?></a>
-                    </li>
-                <?php
-                $n++;
-
-                }
-
-            ?>
-        </ul>
-        <div class="tab-content" id="myClassicTabContent">
-            <?php
-                $n=0;
-                $sql="SELECT * from kategori ORDER BY kategori_id";
-                $query=mysqli_query($con, $sql);
-                while ($data1=mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-                    if ($n==0) {
-                        $ket='show active';
-                    } else {
-                        $ket='';
-
-                    }
-                ?>
-                    <div class="tab-pane fade <?php echo $ket; ?>" id="<?php echo $data1['kategori_slug']; ?>" role="tabpanel" aria-labelledby="<?php echo $data1['kategori_slug']; ?>-tab">
-                        <div class="row">
-                            <table id="example-<?php echo $data1['kategori_id']; ?>" class="table table-striped table-bordered fadeIn animated" style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th>nama item</th>
-                                        <th>subkategori</th>
-                                        <th>stok</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                <?php
-                                    $sqlbarang="SELECT * from barang, subkategori, kategori where barang_subkategori=subkategori_id and subkategori_parent=kategori_id and kategori_id='$data1[kategori_id]'";
-                                    $querybarang=mysqli_query($con, $sqlbarang);
-                                    while ($databarang=mysqli_fetch_array($querybarang, MYSQLI_ASSOC)) {
-
-                                        if ($databarang['barang_disable']==1) {
-                                            $disable = 'disable';
-                                        } else {
-                                            $disable = '';
-                                        }
-
-                                        $harga = $databarang['barang_harga_jual'];
-
-                                        if ($databarang['barang_stok']!=0) {
-                                            $stok_status="";
-                                            
-                                            ?>
-                                            <tr>
-                                                <td><strong class=""><?php echo $databarang['barang_nama']; ?></strong></td>
-                                                <td><strong class=""><?php echo $databarang['subkategori_nama']; ?></strong></td>
-                                                <td><span class="stok <?php echo $stok_status; ?>"><?php echo $databarang['barang_stok']; ?></span></td>
-                                                <td>
-                                                    <button class="btn btn-default pilihmenu m-0" data-id="<?php echo $databarang['barang_id']; ?>">Pilih <i class="fas fa-magic ml-1"></i></button>
-                                                </td>
-                                            </tr>
-                                            <?php
-                                        } else {
-                                            ?>
-                                            <tr>
-                                                <td><strong class=""><?php echo $databarang['barang_nama']; ?></strong></td>
-                                                <td><strong class=""><?php echo $databarang['subkategori_nama']; ?></strong></td>
-                                                <td><span class="stok <?php echo $stok_status; ?>">0</span></td>
-                                                <td></td>
-                                            </tr>
-                                            <?php
-                                        }
-                                        
-                                    }
-                                ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                <?php
-                $n++;
-                }
-
-            ?>
-        </div>
-
-    </div>
-	
-<?php } /*elseif ($kond=='search') { ?>
-	
-    <div class="row p-3">
-    	<div class="col-md-12 mb-2"><h1 class="secondary-heading mb-3 float-left">Hasil pencarian "<?php echo $_GET['q']; ?>"</h1> <button class="btn btn-danger btn-clear-search float-right" >Reset Pencarian <i class="fas fa-times ml-1"></i></button></div>
-    	<div class="search-result">
-        <?php
-            $sqlbarang="SELECT * from barang where barang_nama LIKE '%$_GET[q]%'";
-            $querybarang=mysqli_query($con, $sqlbarang);
-            while ($databarang=mysqli_fetch_array($querybarang, MYSQLI_ASSOC)) {
-            	if ($databarang['barang_image']=='') {
-            		$image = 'default.jpg';
-            	} else {
-            		$image = $databarang['barang_image'];
-            	}
-
-
-		    	if ($_SESSION['order_type']=='online') {
-		        	$harga = $databarang['barang_harga_jual_online'];
-		    	} else {
-		        	$harga = $databarang['barang_harga_jual'];
-		        }
-
-                if ($databarang['barang_set_stok']==0 && $harga!=0) {
-                    ?>
-                        <div class="col-3 mb-3">
-                            <div class="card custom">
-                            	<div class="box-button fadeIn faster animated">
-									<button class="btn btn-default pilihmenu" data-id="<?php echo $databarang['barang_id']; ?>">Pilih <i class="fas fa-magic ml-1"></i></button>
-                            	</div>
-                                <div class="card-body">
-                                	<div class="image-menu" style="background-image: url(../assets/img/produk/<?php echo $image; ?>)"></div>
-                                </div>
-                                <div class="card-footer">
-                                    <strong class="card-title"><?php echo $databarang['barang_nama']; ?></strong>
-                                    Rp. <?php echo format_rupiah($harga); ?>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    <?php
-                    
-                } elseif ($databarang['barang_set_stok']==0 && $harga!=0) {
-                    if ($databarang['barang_stok']!=0) {
-                        if ($databarang['barang_stok']<$databarang['barang_batas_stok']) {
-                            $stok_status="warning";
-                        } else {
-                            $stok_status="";
-                        }
-                        
-                        ?>
-                            <div class="col-3 mb-3">
-                                <div class="card custom <?php echo $stok_status; ?>">
-                                	<div class="box-button fadeIn faster animated">
-                                		<button class="btn btn-primary tambahmenu" data-id="<?php echo $databarang['barang_id']; ?>"><i class="fas fa-magic mr-1"></i> Tambah</button>
-										<button class="btn btn-default pilihmenu" data-id="<?php echo $databarang['barang_id']; ?>">Pilih <i class="fas fa-magic ml-1"></i></button>
-                                	</div>
-                                    <div class="card-body">
-                                    	<div class="image-menu" style="background-image: url(../assets/img/produk/<?php echo $image; ?>)"></div>
-                                        <span class="stok <?php echo $stok_status; ?>">Stok: <?php echo $databarang['barang_stok']; ?></span>
-                                    </div>
-                                    <div class="card-footer">
-                                        <strong class="card-title"><?php echo $databarang['barang_nama']; ?></strong>
-                                    	Rp. <?php echo format_rupiah($harga); ?><br>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php
-                    } else {
-                        ?>
-                            <div class="col-3 mb-3">
-	                            <div class="card custom grey-text">
-	                                <div class="card-body">
-	                                	<div class="image-menu" style="background-image: url(../assets/img/produk/<?php echo $image; ?>)"></div>
-	                                    <span class="stok empty">Stok: Habis</span>
-	                                </div>
-	                                <div class="card-footer">
-	                                    <strong class="card-title"><?php echo $databarang['barang_nama']; ?></strong>
-	                                    Rp. <?php echo format_rupiah($harga); ?>
-	                                </div>
-	                            </div>
-	                        </div>
-                        <?php
-                    }
-                    
-                }    
-            }
-        ?>
-	    </div>
-    </div>
-<?php }*/ elseif ($kond=='jumlah') { ?>
-    <div class="row p-3 row-jumlah justify-content-md-center">
-    	<div class="col-md-6 mt-5">
-    		<h3 class="text-center mb-5">Input Jumlah</h3>
-	    	<form method="post" class="form-jumlah">
-	    		<input type="hidden" id="barang_id" class="form-control" value="<?php echo $_GET['id']; ?>" name="barang_id">  	
-	    		<div class="md-form mb-3">
-				  	<input type="text" id="jumlah" class="form-control" name="jumlah" >
-				  	<label for="jumlah">Jumlah dipesan</label>
-				</div>
-	    		<div class="md-form">
-					<textarea id="keterangan" class="md-textarea form-control" rows="3" name="keterangan"></textarea>
-					<label for="keterangan">Keterangan</label>
-				</div>
-				<button class="btn btn-primary prosesmenu float-right">Proses</button>
-	    	</form>
-	    </div>
-    </div>
-<?php } elseif ($kond=='kembalian') { ?>
-    <input type="hidden" id="ketnota" value="<?php echo $_SESSION['no-nota']; ?>" name="ketnota">   
-    <div class="row p-3 row-jumlah justify-content-md-center">
-        <div class="col-md-6 mt-5">
-            <h3 class="text-center mb-5">Pesanan Berhasil</h3>
-            <button class="btn btn-primary orderbaru float-right">Pesan Baru</button>
-            <button class="btn btn-default printulangnota float-right">Print Ulang nota</button>
-        </div>
-    </div>
-
-   
-<?php }  elseif ($kond=='ceknota') { ?>
-    <div class="row p-3 row-jumlah justify-content-md-center">
-        <div class="col-md-6 mt-5">
-            <h3 class="text-center mb-5">Cek Nota</h3>
-            <form method="post" class="form-jumlah"> 
-                <div class="md-form mb-3">
-                    <input type="text" id="idnonota" class="form-control" name="idnonota" >
-                    <label for="idnonota">No Nota</label>
-                </div>
-                <button class="btn btn-primary prosesceknota float-right">Proses</button>
-                <button class="btn btn-danger kembali float-right">Kembali</button>
-            </form>
-        </div>
-        <div class="clear"></div>
-        <?php if ($_GET['nonota']!='') { 
-            $nota = $_GET['nonota'];
-            $sqlnot="SELECT * FROM transaksi, member where transaksi_member=member_id AND transaksi_id='$nota' ";
-            $querynot=mysqli_query($con,$sqlnot);
-            $datanot=mysqli_fetch_assoc($querynot);
-            $diskon = $datanot['transaksi_diskon'];
-            $total = $datanot['transaksi_total'];
-        ?>
-        <div class="col-md-12 p-5">
-
-            <input type="hidden" id="ip-nota" class="form-control" name="ip-nota" value="<?php echo $nota; ?>" >
-            <h3>Cek Nota Transaksi : <?php echo $nota; ?></h3>
-            <div class="row">
-                <div class="col-md-6 col-md-offset-0">
-                    <h4>Nama : <?php echo $datanot['member_nama'];?></h4>
-                </div>
-                <div class="col-md-6 col-md-offset-0 text-right">
-                    <h4>Alamat : <?php echo $datanot['member_alamat'];?></h4>
-                </div>
-                <table id="listbarang" class="table table-bordered table-striped">
-                    <thead>
-                    <tr>
-                      <th>Nama Produk</th>
-                      <th class="text-right">Harga</th>
-                      <th width="50px" style="padding-right: 8px; ">Jumlah</th>
-                      <th class="text-right">Total</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-                        $sqlte1="SELECT * from transaksi_detail, barang where transaksi_detail_barang_id=barang_id and transaksi_detail_nota='$nota' ORDER BY transaksi_detail_id ASC";
-                        $queryte1 = mysqli_query($con,$sqlte1);
-                        while($datatea = mysqli_fetch_assoc($queryte1)) {
-                            $jumlah = $datatea["transaksi_detail_jumlah"];
-                            $harga = $datatea["barang_harga_jual"];
-                        ?>
-                            <tr>
-                                <td><?php echo $datatea["barang_nama"]; ?></td>
-                                <td class="text-right">Rp. <?php echo format_rupiah($harga); ?></td>
-                                <td><?php echo $jumlah; ?></td>
-                                <td class="text-right">Rp. <?php echo format_rupiah($jumlah*$harga); ?></td>
-                                
-                            </tr>
-                        <?php
-                            if ($datatea["transaksi_detail_diskon"]!=0) {
-                            ?>
-                                <tr style="font-weight: 700;">
-                                    <td>Diskon</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-right">Rp. <?php echo format_rupiah($datatea["transaksi_detail_diskon"]); ?></td>
-                                </tr>
-                            <?php
-                            }
-                        }
-                    ?>
-                    </tbody>
-                </table>
-                <div class="col-6 col-md-offset-0">
-                    <h4>Total : </h4>
-                </div>
-                <div class="col-md-6 col-md-offset-0 text-right">
-                    <h4>Rp. <?php echo format_rupiah($total); ?></h4>
-                </div>              
-            </div>
-            <button class="btn btn-warning printulang float-right mr-0" id="btn-printulang"><i class="fas fa-print mr-2"></i>Print Ulang</button>
-        </div>
-        <?php } ?>
-    </div>
-<?php }  elseif ($kond=='tutupkasir') { ?>
-    <div class="row-jumlah">
-        <div class="row p-3 justify-content-md-center">
-            <div class="col-md-6 mt-5">
-                <h3 class="text-center mb-5">Tutup Kasir</h3>
-                <form method="post" class="form-omset"> 
-                    <div class="md-form mb-3">
-                        <input type="text" id="uangfisik" class="form-control" name="uangfisik" >
-                        <label for="uangfisik">Masukkan Jumlah Uang Fisik</label>
-                    </div>
-                    <button class="btn btn-primary prosestutupkasir float-right">Proses</button>
-                    <button class="btn btn-danger kembali float-right">Kembali</button>
-                </form>
-            </div>
-        </div>
-        <div class="row p-3 justify-content-md-center">
-            <div class="col-md-6 p-5">
-
-                <h3 id="spuangfisik"></h3>
-                <h3 id="spcash"></h3>
-                <h3 id="spdebet"></h3>
-                <h3 id="spomset"></h3>
-                <h3 id="spselisih"></h3>
-                
-                    
-            </div>
-        </div>
-    </div>
-<?php } ?>
-
-
-<?php if ($kond=='home' || $kond=='search' || $kond=='item' || $kond=='' ) { ?>
-
-<script type="text/javascript">
-    $('.pilihmember').on('click',function(e){
-        e.preventDefault();
-        var idmember = $('#defaultForm-member').val();
-        var idtherapist = $('#defaultForm-therapist').val();
-        var nama = $('#defaultForm-nama').val();
-
-
-        $.ajax({
-            type:'POST',
-            url: "controllers/order.ctrl.php?ket=pilihmember",
-            dataType: "json",
-            data:{
-                idmember:idmember,
-                idtherapist:idtherapist,
-                nama:nama
-            },
-            success:function(data){
-                window.location.reload();
-                $('.container__load').load('components/content/order.content.php?kond=home');
-            }
-        }); 
-    });
-
-	for (var i = 0; i < 30 ; i++) {
-        $('#example-'+i).DataTable({
-          "paging": true,
-          "lengthChange": false,
-          "searching": true,
-          "ordering": true,
-          "info": true,
-          "autoWidth": false,
-
-           "drawCallback": function( settings, json ) {
-                $('.pilihmenu').on('click',function(e){
-                    if(e.handled !== true) {
-                        var barang_id = $(this).data('id');
-                        $('.container__load').load('components/content/order.content.php?kond=jumlah&id='+barang_id);
-                        e.handled = true;
-                    }
-                }); 
-                /*
-                $('.tambahmenu').on('click',function(e){
-                    if(e.handled !== true) {
-                        var barang_id = $(this).data('id');
-                        var jumlah = 1;
-                        var keterangan = '';
-                        var hargamanual = 0;
-                        
-                        console.log(barang_id);
-                        
-                        $.ajax({
-                            type:'POST',
-                            url: "controllers/order.ctrl.php?ket=tambahmenu",
-                            dataType: "json",
-                            data:{
-                                barang_id:barang_id,
-                                jumlah:jumlah,
-                            },
-                            success:function(data){
-                                $('#carimenu').val('');
-
-                                console.log('totalordertemp'+data);
-                                if (data.totalordertemp.toString()=="Stok Kurang") {
-                                    $.confirm({
-                                          title: 'Stok Kurang',
-                                          content: 'Jumlah stok tidak mencukupi',
-                                          buttons: {
-                                              confirm: {
-                                                  text: 'Close',
-                                                  btnClass: 'col-md-12 btn btn-primary',
-                                                  action: function(){
-                                                      
-                                                      
-                                                  }
-                                              }
-                                          }
-                                    });
-                                } else {
-                                    var diskon = '';
-                                    var ketdiskon = '';
-                                    
-                                    var content = '<tr class="'+ketdiskon+' fadeInLeft animated"><td><button type="button" class="btn btn-dark-info waves-effect btn orange-text m-0 p-0 btn-remove" data-id="'+data.item.order_detail_temp_id+'"><i class="fas fa-times"></i></button></td><td>'+data.item.barang_nama+'<br><span>'+data.item.order_detail_temp_keterangan+'</span></td><td><button type="button" class="btn btn-dark-info waves-effect btn btn-outline-white mr-2 mt-0 ml-0 mb-0 p-1 btn-plusminus" data-ket="minus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-minus"></i></button><span class="text_jumlah">'+data.item.order_detail_temp_jumlah+'</span><button type="button" class="btn btn-dark-info waves-effect btn-outline-white mr-0 mt-0 ml-2 mb-0 p-1 btn-plusminus" data-ket="plus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-plus"></i></button></td></tr>';
-                                    
-                                    $('#listitem table').append(content);
-                                    $('.container__load').load('components/content/order.content.php?kond=');
-
-                                    $('.btn-remove').unbind('click').click(function() {
-                                        var indexitem = $(this).parent().parent().index();
-                                        var id = $(this).data('id');
-
-                                        removeItemTemp(id, indexitem);
-                                    });
-
-
-                                    $('.btn-plusminus').on('click',function(){
-                                        var indexitem = $(this).parent().parent().index();
-                                        var id = $(this).data('id');
-                                        var idbarang = $(this).data('idbarang');
-                                        var ket = $(this).data('ket');
-                                        var jumlah = $(this).data('jumlah');
-
-                                        plusminusItem(id, idbarang, indexitem, ket, jumlah);
-                                    });
-                                }
-                            }
-                        }); 
-                        e.handled = true;
-                    }         
-                });*/
-            }
-        });
-    }
-
-	$('.pilihmenu').on('click',function(){
-		var barang_id = $(this).data('id');
-		$('.container__load').load('components/content/order.content.php?kond=jumlah&id='+barang_id);
-	});
-
-    $('.pilihjenis').on('click',function(){
-        var jenis_id = $(this).data('id');
-        $('.container__load').load('components/content/order.content.php?kond=item&jenisid='+jenis_id);
-    });
-
-	$('.btn-clear-search').on('click',function(){
-		$('#carimenu').val('');
-		$('.container__load').load('components/content/order.content.php?kond=home');
-
-	});
-
-    $('#ceknota').on('click',function(){
-        $('.container__load').load('components/content/order.content.php?kond=ceknota&nonota=');
-    });
-
-    $('#tutupkasir').on('click',function(){
-        $('.container__load').load('components/content/order.content.php?kond=tutupkasir&omset=');
-    });
-
-    /*
-	$('.tambahmenu').unbind('click',function(){
-    	var barang_id = $(this).data('id');
-    	var jumlah = 1;
-    	var keterangan = '';
-        var hargamanual = 0;
-    	if ($('#defaultForm-ordertype').val()=='online') {
-        	var pajakjml = $('#ip-pajakonline').val();	
-    	} else {
-        	var pajakjml = $('#ip-pajakresto').val();
-        }
-        console.log(barang_id);
-        
-        $.ajax({
-            type:'POST',
-	        url: "controllers/order.ctrl.php?ket=tambahmenu",
-            dataType: "json",
-            data:{
-            	barang_id:barang_id,
-            	jumlah:jumlah,
-            	keterangan:keterangan,
-                hargamanual:hargamanual
-            },
-            success:function(data){
-				$('#carimenu').val('');
-
-            	console.log('totalordertemp'+data);
-            	if (data.totalordertemp.toString()=="Stok Kurang") {
-            		$.confirm({
-	                      title: 'Stok Kurang',
-	                      content: 'Jumlah stok tidak mencukupi',
-	                      buttons: {
-	                          confirm: {
-	                              text: 'Close',
-	                              btnClass: 'col-md-12 btn btn-primary',
-	                              action: function(){
-	                                  
-	                                  
-	                              }
-	                          }
-	                      }
-	                });
-            	} else {
-                    var diskon = '';
-                    var ketdiskon = '';
-                    if (data.item.order_detail_temp_diskon!=0) {
-                        diskon = '<tr class="fadeInLeft animated diskon"><td></td><td>Diskon</td><td></td><td><span class="text_total">Rp. '+formatRupiah((data.item.order_detail_temp_jumlah*data.item.order_detail_temp_diskon).toString())+'</span></td></tr>';
-                        ketdiskon = 'itemdiskon';
-                    } else {
-                        diskon = '';
-                        ketdiskon = '';
-                    }
-		            var content = '<tr class="'+ketdiskon+' fadeInLeft animated"><td><button type="button" class="btn btn-dark-info waves-effect btn orange-text m-0 p-0 btn-remove" data-id="'+data.item.order_detail_temp_id+'"><i class="fas fa-times"></i></button></td><td>'+data.item.barang_nama+'<br><span>'+data.item.order_detail_temp_keterangan+'</span></td><td><button type="button" class="btn btn-dark-info waves-effect btn btn-outline-white mr-2 mt-0 ml-0 mb-0 p-1 btn-plusminus" data-ket="minus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-minus"></i></button><span class="text_jumlah">'+data.item.order_detail_temp_jumlah+'</span><button type="button" class="btn btn-dark-info waves-effect btn-outline-white mr-0 mt-0 ml-2 mb-0 p-1 btn-plusminus" data-ket="plus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-plus"></i></button></td><td><span class="text_total">'+formatRupiah(data.item.order_detail_temp_total, 'Rp. ')+'</span></td></tr>'+diskon;
-		        	$('#subtotal').empty();
-		            $('#subtotal').append(formatRupiah(data.totalordertemp.toString(), 'Rp. '));
-
-					var tax = parseInt(pajakjml)*data.totalordertemp*0.1;
-					if ($('#ip-pajakpembulatan').val()==1) {
-						tax = pembulatan(tax);
-			        }
-
-		        	$('#pajak').empty();
-					$('#pajak').append(formatRupiah(tax.toString(), 'Rp. '))
-					
-					var taxservice = 0;
-			        if ($('#ip-pajakservice').val()!='') {
-			        	taxservice = parseInt($('#ip-pajakservice').val())*data.totalordertemp/100;
-						if ($('#ip-pajakpembulatan').val()==1) {
-							taxservice = pembulatan(taxservice);
-				        }
-				        
-			        	$('#pajakservice').empty();
-						$('#pajakservice').append(formatRupiah(taxservice.toString(), 'Rp. '))
-			        }
-			        
-			        var jmldiskon = $("#defaultForm-jumlahdiskon").val();
-
-					var total = tax+data.totalordertemp+taxservice-jmldiskon;
-					$('#total').empty();
-					$('#total').append(formatRupiah(total.toString(), 'Rp. '));
-
-					$('#defaultForm-tax').val(tax);
-					$('#defaultForm-subtotal').val(data.totalordertemp);
-                    $('#defaultForm-total').val(total);
-
-					$('#listitem table').append(content);
-					$('.container__load').load('components/content/order.content.php?kond=');
-
-					$('.btn-remove').unbind('click').click(function() {
-						var indexitem = $(this).parent().parent().index();
-                        var id = $(this).data('id');
-
-                        var classdiskon = $(this).parent().parent().hasClass("itemdiskon");
-                        console.log(classdiskon+" "+indexitem+" "+$(this).parent().parent())
-                        removeItemTemp(id, indexitem);
-					});
-
-
-					$('.btn-plusminus').on('click',function(){
-						var indexitem = $(this).parent().parent().index();
-						var id = $(this).data('id');
-						var idbarang = $(this).data('idbarang');
-						var ket = $(this).data('ket');
-						var jumlah = $(this).data('jumlah');
-
-						plusminusItem(id, idbarang, indexitem, ket, jumlah);
-					});
-            	}
-            }
-        });          
-	});
-    */
-
-</script>
-
-<?php } elseif ($kond=='kembalian') { ?>
-    <script type="text/javascript">
-        $('.orderbaru').on('click',function(){
-            window.location.reload();
-            $('.container__load').load('components/content/order.content.php?kond=home');
-        });
-    </script>
-
-<?php } elseif ($kond=='ceknota' || $kond=='tutupkasir') { ?>
-    <script type="text/javascript">
-
-        $('.kembali').on('click',function(e){
-            e.preventDefault();
-            var idnonota = $('#idnonota').val();
-            $('.container__load').load('components/content/order.content.php?kond=home');
-        });
-
-        $('.prosesceknota').on('click',function(e){
-            e.preventDefault();
-            var idnonota = $('#idnonota').val();
-            $('.container__load').load('components/content/order.content.php?kond=ceknota&nonota='+idnonota);
-        });
-
-        $('.prosestutupkasir').on('click',function(e){
-            e.preventDefault();
-            var data = $('.form-omset').serialize();
-            console.log("data "+data)
-            $.ajax({
-                type:'POST',
-                url: "controllers/order.ctrl.php?ket=tutupkasir",
-                dataType: "json",
-                data:data,
-                success:function(data){
-                    console.log("data "+data);
-                    if (data.ket == "gagal") {
-                        $.confirm({
-                              title: 'Validasi Gagal',
-                              content: 'Validasi max 1x',
-                              buttons: {
-                                  confirm: {
-                                      text: 'Close',
-                                      btnClass: 'col-md-12 btn btn-primary',
-                                      action: function(){
-                                          
-                                          
-                                      }
-                                  }
-                              }
-                        });
-                    } else {
-
-
-                        $('#spuangfisik').empty();
-                        $('#spuangfisik').append("Uang Fisik : <span class='float-right'>"+formatRupiah(data.uangfisik.toString(), 'Rp. ')+"</span>");
-                        $('#spcash').empty();
-                        if (data.cash==null) {
-                            $('#spcash').append("Omset Cash : <span class='float-right'>Rp. 0</span>");
-                        } else {
-                            $('#spcash').append("Omset Cash : <span class='float-right'>"+formatRupiah(data.cash.toString(), 'Rp. ')+"</span>");
-                        }
-                        $('#spdebet').empty();
-                        if (data.cash==null) {
-                            $('#spdebet').append("Omset Debet : <span class='float-right'>Rp. 0</span>");
-                        } else {
-                            $('#spdebet').append("Omset Debet : <span class='float-right'>"+formatRupiah(data.debet.toString(), 'Rp. ')+"</span>");
-                        }
-                        $('#spomset').empty();
-                        $('#spomset').append("Total Omset : <span class='float-right'>"+formatRupiah(data.omset.toString(), 'Rp. ')+"</span>");
-                        $('#spselisih').empty();
-                        var selisih = data.uangfisik - data.cash;
-                        if (selisih < 0) {
-                            $('#spselisih').append("Selisih : <span class='float-right text-danger'>"+formatRupiah(selisih.toString(), 'Rp. ')+"</span>");
-                        } else {
-                            $('#spselisih').append("Selisih : <span class='float-right'>"+formatRupiah(selisih.toString(), 'Rp. ')+"</span>");
-                        }
-
-                            windowList = new Array('../print/omset.print.php');
-                            i = 0;
-                            windowName = "window";
-                            windowInterval = window.setInterval(function(){
-                                window.open(windowList[i],windowName+i,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,titlebar=no');
-                                i++;
-                                if(i==windowList.length){
-                                    window.clearInterval(windowInterval);
-                                }
-                            },1000);
-
-                    }
-
-                }
-            });
-
-        });
-
-        $('#btn-printulang').on('click',function(e){
-            var idnonota = $('#ip-nota').val();
-            e.preventDefault();
-            
-            windowList = new Array('../print/nota.print.php?id='+idnonota);
-            i = 0;
-            windowName = "window";
-            windowInterval = window.setInterval(function(){
-              window.open(windowList[i],windowName+i,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,titlebar=no');
-              i++;
-              if(i==windowList.length){
-                window.clearInterval(windowInterval);
-              }
-            },1000);
-        });
-
-                                    
-    </script>
-
-<?php } elseif ($kond=='jumlah') { ?>
-
-	<script type="text/javascript">
-		
-		$('.prosesmenu').on('click',function(e){
-			e.preventDefault();
-	        var data = $('.form-jumlah').serialize();
-        	
-	        console.log("prosesmenu1");
-	        console.log(data)
-	       
-	        $.ajax({
-	            type:'POST',
-		        url: "controllers/order.ctrl.php?ket=tambahmenu",
-	            dataType: "json",
-	            data:data,
-	            success:function(data){
-                    console.log(data.totalordertemp.toString());
-					$('#carimenu').val('');
-	            	if (data.totalordertemp.toString()=="Stok Kurang") {
-	            		$.confirm({
-		                      title: 'Stok Kurang',
-		                      content: 'Jumlah stok tidak mencukupi',
-		                      buttons: {
-		                          confirm: {
-		                              text: 'Close',
-		                              btnClass: 'col-md-12 btn btn-primary',
-		                              action: function(){
-		                                  
-		                                  
-		                              }
-		                          }
-		                      }
-		                });
-	            	} else {
-                        var diskon = '';
-                        var ketdiskon = '';
-                       
-
-			            var content = '<tr class="'+ketdiskon+' fadeInLeft animated"><td><button type="button" class="btn btn-dark-info waves-effect btn orange-text m-0 p-0 btn-remove" data-id="'+data.item.order_detail_temp_id+'"><i class="fas fa-times"></i></button></td><td>'+data.item.barang_nama+'<br><span>'+data.item.order_detail_temp_ket+'</span></td><td><button type="button" class="btn btn-dark-info waves-effect btn btn-outline-white mr-2 mt-0 ml-0 mb-0 p-1 btn-plusminus" data-ket="minus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-minus"></i></button><span class="text_jumlah">'+data.item.order_detail_temp_jumlah+'</span><button type="button" class="btn btn-dark-info waves-effect btn-outline-white mr-0 mt-0 ml-2 mb-0 p-1 btn-plusminus" data-ket="plus" data-id="'+data.item.order_detail_temp_id+'" data-idbarang="'+data.item.order_detail_temp_barang_id+'" data-jumlah="'+data.item.order_detail_temp_jumlah+'"><i class="fas fa-plus"></i></button></td></tr>';
-
-			        	
-						$('#listitem table').append(content);
-						$('.container__load').load('components/content/order.content.php?kond=');
-
-						$('.btn-remove').unbind('click').click(function() {
-							var indexitem = $(this).parent().parent().index();
-                            var id = $(this).data('id');
-
-                            removeItemTemp(id, indexitem);
-						});
-
-						$('.btn-plusminus').on('click',function(){
-							var indexitem = $(this).parent().parent().index();
-							var id = $(this).data('id');
-							var idbarang = $(this).data('idbarang');
-							var ket = $(this).data('ket');
-							var jumlah = $(this).data('jumlah');
-
-							plusminusItem(id, idbarang, indexitem, ket, jumlah);
-						});
-					}
-
-	            }
-	        });
-		});		
-
-	</script>
+?>
 
 <?php
+if($_SESSION['print']=='ya') {
+?>
+    <script type="text/javascript">
+        window.open("export/pdf-penawaran.php");
+        </script>
+    <?php
+}
+if ($kond=='home' || $kond=='') {
+    $_SESSION['print']='tidak';
+
+?>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="form-transaksi">
+                <input type="hidden" id="defaultForm-namajenis" name="ip-namajenis">
+                <input type="hidden" id="defaultForm-namabahan" name="ip-namabahan">
+                <input type="hidden" id="defaultForm-namamodel" name="ip-namamodel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="md-form mb-0">
+                          <select class="mdb-select select-jenis md-form" id="defaultForm-jenis" name="ip-jenis">
+                            <option value="">Pilih Jenis</option>
+                            <?php
+                              $sql="SELECT * from jenis";
+                              $result=mysqli_query($con,$sql);
+                              while ($data1=mysqli_fetch_array($result,MYSQLI_ASSOC)) {
+                                    echo "<option value='$data1[jenis_id]'>$data1[jenis_nama]</option>";
+                              }
+                            ?>
+                          </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 box-namalain hidden">
+                        <div class="md-form mb-0">
+                            <input type="text" id="defaultForm-nama" class="form-control" name="ip-namalain">
+                            <label for="defaultForm-nama">Nama Item</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 box-model hidden">
+                        <div class="md-form mb-0">
+                          <select class="mdb-select select-model md-form" id="defaultForm-model" name="ip-model">
+                            <option value="0">Pilih Model</option>
+                          </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 box-bahan hidden">
+                        <div class="md-form mb-0">
+                          <select class="mdb-select select-bahan md-form" id="defaultForm-bahan" name="ip-bahan">
+                            <option value="0">Pilih Bahan</option>
+                          </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="row box-other">
+                    <div class="col-md-2">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-ruang" class="form-control mb-3" name="ip-ruang" disabled>
+                            <label for="defaultForm-ruang">Ruang</label>
+                        </div>                
+                    </div>
+                    <div class="col-md-2">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-kodebahan" class="form-control mb-3" name="ip-kodebahan" disabled>
+                            <label for="defaultForm-kodebahan">Kode Bahan</label>
+                        </div>                
+                    </div>
+                    <div class="col-md-2">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-kodebahan1" class="form-control mb-3" name="ip-kodebahan1" disabled>
+                            <label for="defaultForm-kodebahan1">Kode Bahan Vitras</label>
+                        </div>                
+                    </div>
+                    <div class="col-md-2">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-hargabahan" class="form-control mb-3" name="ip-hargabahan" disabled>
+                            <label for="defaultForm-hargabahan">Harga Bahan</label>
+                        </div>                
+                    </div>
+                    <div class="col-md-2">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-hargabox" class="form-control mb-3" name="ip-hargabox" disabled>
+                            <label for="defaultForm-hargabahan">Harga Box</label>
+                        </div>                
+                    </div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-tinggi" class="form-control mb-3" name="ip-tinggi1" value="100" disabled>
+                            <label for="defaultForm-tinggi" class="active">Tinggi</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-lebar" class="form-control mb-3" name="ip-lebar1" value="100" disabled>
+                            <label for="defaultForm-lebar" class="active">Lebar</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-volume" class="form-control mb-3" name="ip-volume1" value="0" disabled>
+                            <label for="defaultForm-volume" class="active">Volume(m)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="number" id="defaultForm-jumlah" class="form-control mb-3" name="ip-jumlah" maxlength="5" value="1"  step="any" disabled>
+                            <label for="defaultForm-jumlah" class="active">Jumlah</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <input type="text" id="defaultForm-tarikan" class="form-control mb-3" name="ip-tarikan" disabled>
+                            <label for="defaultForm-tarikan">Tarikan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="md-form mb-0 mt-0">
+                            <select class="mdb-select md-form select-other" id="defaultForm-kt" name="ip-kt" disabled>
+                                <option value="G:KT/V:E">G:KT/V:E</option>
+                                <option value="G:KT/V:KT">G:KT/V:KT</option>
+                                <option value="G:E/V:E">G:E/V:E</option>
+                                <option value="G:E/V:KT">G:E/V:KT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-21">
+                        <div class="md-form mb-0 mt-0">
+                            <select class="mdb-select md-form select-other" id="defaultForm-relalat1" name="ip-relalat1" disabled>
+                                <option value="" >Pilih Rel 1</option>
+                                <option value="Rolet">Rolet</option>
+                                <option value="Delux">Delux</option>
+                                <option value="Lengkung">Lengkung</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-21">
+                        <div class="md-form mb-0 mt-0">
+                            <select class="mdb-select md-form select-other" id="defaultForm-relalat2" name="ip-relalat2" disabled>
+                                <option value="" >Pilih Rel 2</option>
+                                <option value="Rolet">Rolet</option>
+                                <option value="Delux">Delux</option>
+                                <option value="Lengkung">Lengkung</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-21">
+                        <div class="md-form mb-0 mt-0">
+                            <select class="mdb-select md-form select-other" id="defaultForm-relwarna" name="ip-relwarna" disabled>
+                                <option value="">Pilih Warna</option>
+                                <option value="Putih">Putih</option>
+                                <option value="Coklat Kayu">Coklat Kayu</option>
+                                <option value="Gold">Gold</option>
+                                <option value="Silver">Silver</option>
+                                <option value="Black">Black</option>
+                                <option value="Lengkuy">Lengkuy</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-21">
+                        <div class="md-form mb-0 mt-0">
+                            <button class="btn btn-primary btn-proses" disabled="">&nbsp;&nbsp;Input&nbsp;&nbsp;</button>
+                            <button class="btn btn-default btn-openmodal" data-toggle="modal" data-target="#modalorder">Selesai</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php 
 }
 
-if ($kond=='home') { ?>
-    <script type="text/javascript">
-		$.ajax({
-	        type:'POST',
-	        url:'api/view.api.php?func=list-order-temp',
-	        dataType: "json",
-	        success:function(data){
-	        	$('#listitem table').empty();
-	        	$('#subtotal').empty();
-	        	$('#pajak').empty();
-	        	$('#total').empty();
-	        	if ($('#defaultForm-ordertype').val()=='online') {
-		        	var pajakjml = $('#ip-pajakonline').val();	
-	        	} else {
-		        	var pajakjml = $('#ip-pajakresto').val();
-		        }
-	            var content = "";
-	            var subtotal = 0;
-
-                var diskon = '';
-                var ketdiskon = '';
-				for (var i in data) {
-
-
-				    content += '<tr class="'+ketdiskon+'"><td><button type="button" class="btn btn-dark-info waves-effect btn orange-text m-0 p-0 btn-remove" data-id="'+data[i].order_detail_temp_id+'"><i class="fas fa-times"></i></button></td><td>'+data[i].barang_nama+'<br><span>'+data[i].order_detail_temp_ket+'</span></td><td><button type="button" class="btn btn-dark-info waves-effect btn btn-outline-white mr-2 mt-0 ml-0 mb-0 p-1 btn-plusminus"  data-ket="minus" data-id="'+data[i].order_detail_temp_id+'" data-idbarang="'+data[i].order_detail_temp_barang_id+'" data-jumlah="'+data[i].order_detail_temp_jumlah+'"><i class="fas fa-minus"></i></button><span class="text_jumlah">'+data[i].order_detail_temp_jumlah+'</span><button type="button" class="btn btn-dark-info waves-effect btn-outline-white mr-0 mt-0 ml-2 mb-0 p-1 btn-plusminus" data-ket="plus" data-id="'+data[i].order_detail_temp_id+'" data-idbarang="'+data[i].order_detail_temp_barang_id+'" data-jumlah="'+data[i].order_detail_temp_jumlah+'"><i class="fas fa-plus"></i></button></td></tr>';
-				}				
-                $('#listitem table').append(content);
-
-				$('.btn-remove').unbind('click').click(function() {
-					var indexitem = $(this).parent().parent().index();
-					var id = $(this).data('id');
-                    var classdiskon = $(this).parent().parent().hasClass("itemdiskon");
-					removeItemTemp(id, indexitem);
-
-				});
-
-				$('.btn-plusminus').on('click',function(){
-					var indexitem = $(this).parent().parent().index();
-					var id = $(this).data('id');
-					var idbarang = $(this).data('idbarang');
-					var ket = $(this).data('ket');
-					var jumlah = $(this).data('jumlah');
-
-					plusminusItem(id, idbarang, indexitem, ket, jumlah);
-				});
-	        }
-	    });
-
-	</script>
-
-<?php } ?>
+?>
+    <style type="text/css">
+        @media (max-width: 767px) {
+            #table-listbarang_wrapper .row {
+                overflow-x: auto;
+            }
+        }
+    </style>
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <table id="table-listbarang" class="table table-striped table-bordered fadeInLeft slow animated">
+                        <thead>
+                            <tr>
+                                <th>Ruang</th>
+                                <th>T<br><span style="font-size: 11px;">(cm)</span></th>
+                                <th>L<br><span style="font-size: 11px;">(cm)</span></th>
+                                <th>V<br><span style="font-size: 11px;">(m)</span></th>
+                                <th>Jenis</th>
+                                <th>Bahan</th>
+                                <th>Kode<br>Bahan</th>
+                                <th>Tarikan</th>
+                                <th>Model</th>
+                                <th>Jumlah</th>
+                                <th>KT/E</th>
+                                <th>Rel/Alat</th>
+                                <th>Warna</th>
+                                <th>Ukuran Rel</th>
+                                <th>Harga</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th colspan="14" style="text-align:right">Total:</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script type="text/javascript">
+    $(document).ready(function(){
+
+        $('.select-jenis').materialSelect();
+        $('.select-other').materialSelect();
+
+        $('#table-listbarang').DataTable( {
+            "pageLength": 50,
+            "processing": true,
+            "serverSide": true,
+            "searching": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            "ajax": 
+            {
+                "url": "api/datatable.api.php?ket=transaksi-listbahan", // URL file untuk proses select datanya
+                "type": "POST"
+            },
+            "deferRender": true,
+            "columns": [
+                { "data": "pengukuran_detail_temp_ruang" },
+                { "data": "pengukuran_detail_temp_tinggi" },
+                { "data": "pengukuran_detail_temp_lebar" },
+                { "data": "pengukuran_detail_temp_volume" },
+                { "render": function(data, type, full){
+                        if (full['pengukuran_detail_temp_jenis_lain']!='') {
+                           return full['jenis_nama']+' / '+full['pengukuran_detail_temp_jenis_lain'];
+
+                        } else {
+                           return full['jenis_nama'];
+                        }
+                    }
+                },
+                { "data": "bahan_nama" },
+                { "render": function(data, type, full){
+                        if (full['pengukuran_detail_temp_kode_bahan_1']!='') {
+                           return full['pengukuran_detail_temp_kode_bahan']+' / '+full['pengukuran_detail_temp_kode_bahan_1'];
+
+                        } else {
+                           return full['pengukuran_detail_temp_kode_bahan'];
+                        }
+                    }
+                },
+                { "data": "pengukuran_detail_temp_tarikan" },
+                { "data": "model_nama" },
+                { "data": "pengukuran_detail_temp_jumlah" },
+                { "data": "pengukuran_detail_temp_kt" },
+                { "render": function(data, type, full){
+                        if (full['pengukuran_detail_temp_alat_2']!='') {
+                           return full['pengukuran_detail_temp_alat_1']+' / '+full['pengukuran_detail_temp_alat_2'];
+
+                        } else {
+                           return full['pengukuran_detail_temp_alat_1'];
+                        }
+                    }
+                },
+                { "data": "pengukuran_detail_temp_alat_warna" },
+                { "data": "pengukuran_detail_temp_alat_ukuran" },
+                { "data": "pengukuran_detail_temp_harga" },
+                { "width": "90px", "render": function(data, type, full){
+                   return '<a class="btn-floating btn-sm btn-danger btn-remove" data-id="' + full['pengukuran_detail_temp_id'] + '" title="Delete"><i class="fas fa-trash"></i></a>';
+                    }
+                },
+            ],
+            "drawCallback": function( settings ) {
+              
+              $('.btn-remove').on('click', function(){
+                  var item_id = $(this).data('id');
+                  $.confirm({
+                      title: 'Konfirmasi Hapus item',
+                      content: 'Apakah yakin menghapus item ini?',
+                      buttons: {
+                          confirm: {
+                              text: 'Ya',
+                              btnClass: 'col-md-6 btn btn-primary',
+                              action: function(){
+                                  console.log(item_id);
+                                  
+                                  $.ajax({
+                                    type: 'POST',
+                                    url: "controllers/transaksi.ctrl.php?ket=remove-item",
+                                    dataType: "json",
+                                    data:{item_id:item_id},
+                                    success: function(data) {
+                                      if (data[0]=="ok") {
+                                        $('#table-listbarang').DataTable().ajax.reload();
+                                      } else {
+                                        alert('item gagal dihapus')
+                                      }
+                                    }
+                                  });
+                                  
+                              }
+                          },
+                          cancel: {
+                              text: 'Tidak',
+                              btnClass: 'col-md-6 btn btn-danger text-white',
+                              action: function(){
+                                  console.log("tidak")
+                                 
+                              }
+                              
+                          }
+                      }
+                  });
+              });
+              
+            },
+            "footerCallback": function ( row, data, start, end, display ) {
+                var api = this.api(), data;
+     
+                // Remove the formatting to get integer data for summation
+                var intVal = function ( i ) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+     
+                // Total over all pages
+                total = api
+                    .column( 14 )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0 );
+     
+                // Update footer
+                $( api.column( 14 ).footer() ).html(
+                    'Rp. '+formatCurrency(total.toString(), '')
+                );
+            }
+        });
+
+        $("#defaultForm-jenis").change(function(){
+
+            $('.select-other').materialSelect({destroy:true});
+            $(".box-other").children().children().children().attr("disabled", "disabled");
+            $(".btn-openmodal").removeAttr("disabled");
+            $('.select-other').materialSelect();
+            var idjenis = $(this).val();
+            var namajenis = $( "#defaultForm-jenis option:selected" ).text();
+            console.log(idjenis);
+            $('#defaultForm-model').children('option:not(:first)').remove();
+            $('#defaultForm-bahan').children('option:not(:first)').remove();
+            $.ajax({
+                type:'POST',
+                url:'api/view.api.php?func=cekmodel',
+                dataType: "json",
+                data:{idjenis:idjenis},
+                success: function(data) {
+                    $("#defaultForm-namajenis").val(namajenis);
+                    if(data[0].lengthdata!=0) {
+                        $(".box-model").removeClass('hidden');
+                        $("#defaultForm-model").change(function(){
+                            $("#defaultForm-namamodel").val($("#defaultForm-model option:selected").text());
+                        });
+                    } else {
+                        $(".box-model").addClass('hidden');
+
+                    }
+                    for (var i = 0; i < data[0].lengthdata; i++) {
+                        $("#defaultForm-model").append('<option value="'+data[0].idmodel[i]+'">'+data[0].namamodel[i]+'</option>');
+                    }
+
+                    if(data[0].lengthdatabahan!=0) {
+                        $(".box-bahan").removeClass('hidden');
+                        $("#defaultForm-bahan").change(function(){
+                            $("#defaultForm-namabahan").val($("#defaultForm-bahan option:selected").text());
+                            removeDisabled(namajenis);
+                        });
+                    } else {
+                        $("#defaultForm-model").change(function(){
+                            $("#defaultForm-namamodel").val($("#defaultForm-model option:selected").text());
+                            removeDisabled(namajenis);
+                        });
+                        $(".box-bahan").addClass('hidden');
+
+                    }
+                    for (var i = 0; i < data[0].lengthdatabahan; i++) {
+                        $("#defaultForm-bahan").append('<option value="'+data[0].idbahan[i]+'">'+data[0].namabahan[i]+'</option>');
+                    }
+                    $('.select-model').materialSelect({destroy:true});
+                    $('.select-bahan').materialSelect({destroy:true});
+                    $('.select-bahan').materialSelect();
+                    $('.select-model').materialSelect();
+                    
+                    if ($( "#defaultForm-jenis option:selected" ).text()=='Lain-lain') {
+                        $(".box-namalain").removeClass('hidden');
+                        removeDisabled(namajenis);
+                    } else {
+                        $(".box-namalain").addClass('hidden');
+
+                    }
+                }
+            });
+        });
+
+        $(".btn-proses").click(function(e){
+            e.preventDefault();
+            var data = $('.form-transaksi').serialize();
+            console.log(data);
+            $.ajax({
+              type: 'POST',
+              url: "controllers/transaksi.ctrl.php?ket=inputpengukuran",
+              data: data,
+              success: function(data) {
+                    $('.select-other').materialSelect({destroy:true});
+                    $(".box-other").children().children().children().attr("disabled", "disabled");
+                    $(".btn-openmodal").removeAttr("disabled");
+                    $(".box-other").children().children().children().val('');
+                    $('.select-other').materialSelect();
+                    $(".box-namalain").addClass('hidden');
+                    $(".box-model").addClass('hidden');
+                    $(".box-bahan").addClass('hidden');
+                    $( "#defaultForm-jenis").val("");
+                    $( "#defaultForm-bahan").val("");
+                    $( "#defaultForm-model").val("");
+                    $( "#defaultForm-tinggi").val(100);
+                    $( "#defaultForm-lebar").val(100);
+                    $( "#defaultForm-volume").val(0);
+                    $( "#defaultForm-jumlah").val(1);
+                    $( "#table-listbarang").DataTable().ajax.reload();
+                
+                }
+            });
+        
+        });
+
+        $('.btn-openmodal').on('click',function(e){
+            e.preventDefault();
+            $('#listbarang tbody').empty();
+            $.ajax({
+                type:'POST',
+                url:'api/view.api.php?func=detailorder',
+                dataType: "json",
+                success:function(data){
+                    console.log(data);
+                    var jml = 0;
+                    for (var i in data) {
+                        if (i==0) {
+
+                            $('#modalorder p.nama').text('Nama: '+data[i].nama);
+                            $('#modalorder p.alamat').text('Alamat: '+data[i].alamat);
+                          
+                        } else {
+                            var namalain = '';
+                          if (data[i].pengukuran_detail_temp_jenis_lain!='') {
+                            namalain = ' / '+data[i].pengukuran_detail_temp_jenis_lain;
+                          }
+                          $('#listbarang tbody').append("<tr><td>"+data[i].pengukuran_detail_temp_ruang+"</td><td>"+data[i].jenis_nama+""+namalain+"</td><td class='text-right'>"+formatRupiah(data[i].pengukuran_detail_temp_harga.toString(), '')+"</td></tr>");
+                          jml+=parseInt(data[i].pengukuran_detail_temp_harga);
+
+                        }
+                    }
+                        $('#listbarang tbody').append("<tr><th colspan='2'>Total</th><th class='text-right'>"+formatRupiah(jml.toString(), '')+"</th></tr>");
+                        $('#modalorder #defaultForm-total').val(jml);
+                }
+
+            });
+        });
+    });
+
+    function removeDisabled(namajenis) {
+        console.log("ok "+namajenis)
+        $('.select-other').materialSelect({destroy:true});
+        $(".box-other").children().children().children().removeAttr("disabled");
+
+        if (namajenis=="Gorden & Vitras") {
+            $("#defaultForm-kodebahan1").removeAttr("disabled");
+        } else {
+            $("#defaultForm-kodebahan1").attr("disabled", "disabled");
+        }
+        if (namajenis=='Gorden & Vitras'||namajenis=='Vitras'||namajenis=='Gorden'||namajenis=='Poni Polos'||namajenis=='Poni Motif'||namajenis=='Kaca Film') {
+            $("#defaultForm-hargabahan").attr("disabled", "disabled");
+        } else {
+            $("#defaultForm-hargabahan").removeAttr("disabled");
+        }
+        if (namajenis=="Lain-lain") {
+            $("#defaultForm-volume").removeAttr("disabled");
+        } else {
+            $("#defaultForm-volume").attr("disabled", "disabled");
+        }
+        if (namajenis=="Poni Motif" || namajenis=="Poni Polos") {
+            $("#defaultForm-hargabox").removeAttr("disabled");
+        } else {
+            $("#defaultForm-hargabox").attr("disabled", "disabled");
+        }
+        if (namajenis=='Roller Blind'||namajenis=='Vertikal Blind'||namajenis=='Horizontal Blind'||namajenis=='Wodden Blind') {
+            $("#defaultForm-tarikan").removeAttr("disabled");
+        } else {
+            $("#defaultForm-tarikan").attr("disabled", "disabled");
+        }
+        if (namajenis=='Gorden & Vitras'||namajenis=='Vitras'||namajenis=='Gorden'||namajenis=='Poni Polos'||namajenis=='Poni Motif') {
+            $("#defaultForm-kt").removeAttr("disabled");
+            $("#defaultForm-relalat1").removeAttr("disabled");
+            $("#defaultForm-relwarna").removeAttr("disabled");
+            if (namajenis!='Gorden & Vitras'){
+                $("#defaultForm-relalat2").attr("disabled", "disabled");
+                $('#defaultForm-kt').children('option').remove();
+                $("#defaultForm-kt").append('<option value="KT">KT</option>');
+                $("#defaultForm-kt").append('<option value="E">E</option>');
+            } else {
+                $("#defaultForm-relalat2").removeAttr("disabled");
+                $('#defaultForm-kt').children('option').remove();
+                $("#defaultForm-kt").append('<option value="G:KT/V:E">G:KT/V:E</option>');
+                $("#defaultForm-kt").append('<option value="G:KT/V:KT">G:KT/V:KT</option>');
+                $("#defaultForm-kt").append('<option value="G:E/V:E">G:E/V:E</option>');
+                $("#defaultForm-kt").append('<option value="G:E/V:KT">G:E/V:KT</option>');
+            }
+        } else {
+            $("#defaultForm-kt").attr("disabled", "disabled");
+            $("#defaultForm-relalat1").attr("disabled", "disabled");
+            $("#defaultForm-relalat2").attr("disabled", "disabled");
+            $("#defaultForm-relwarna").attr("disabled", "disabled");
+        }
+
+        $('.select-other').materialSelect();
+    }
+    /*
 	function removeItemTemp(id, index) {
 		$.ajax({
 			type:'POST',
@@ -935,7 +637,7 @@ if ($kond=='home') { ?>
 				var total = tax+data.totalordertemp;
 				$('#total').empty();
 				$('#total').append(formatRupiah(total.toString(), 'Rp. '));
-				*/
+				
 
 				
             }
@@ -985,4 +687,5 @@ if ($kond=='home') { ?>
             return tax;
         }
 	}
+    */
 </script>

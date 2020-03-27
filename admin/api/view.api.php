@@ -1,111 +1,72 @@
 <?php
 include '../../config/database.php';
+include "../../include/hitung_harga.php";
 session_start();
+date_default_timezone_set('Asia/jakarta');
 $bln=date('Y-m');
 $user = $_SESSION['login_user'];
-$cabang = $_SESSION['cabang'];
+$cabang = '';
 $role = $_SESSION['role'];
 
 $func = $_GET['func'];
 
-if ($func=='dasboard-omset') {
+if ($func=='omset-grafik-dashboard') {
 
-	$query = "SELECT transaksi_tanggal, sum(transaksi_total) as total FROM transaksi where transaksi_bulan = '$bln' GROUP BY transaksi_tanggal";
+    $query = "SELECT pengukuran_tanggal, sum(pengukuran_total_harga) as total FROM pengukuran where pengukuran_bulan = '$bln' and pengukuran_status NOT LIKE '%penawaran%' GROUP BY pengukuran_tanggal";
 
-} elseif ($func=='dasboard-pelanggan') {
+} elseif ($func=='transaksi-grafik-dashboard') {
 
-	$query = "SELECT count(*) as jumlah FROM transaksi where transaksi_bulan = '$bln' GROUP BY transaksi_tanggal";
+    $query = "SELECT pengukuran_tanggal, COUNT(pengukuran_id) as jumlah FROM pengukuran where pengukuran_bulan = '$bln' and pengukuran_status NOT LIKE '%penawaran%' GROUP BY pengukuran_tanggal";
 
-} elseif ($func=='dasboard-itemsold') {
+} elseif ($func=='edititem') {
+	$id = $_POST['item_id'];
+	$query = "SELECT * from bahan where bahan_id='$id'";
 
-    $id = $_POST['kategoriid'];
-    $query = "SELECT kategori_nama, barang_nama, sum(transaksi_detail_jumlah) as jumlah FROM transaksi, transaksi_detail, barang, subkategori, kategori where transaksi_id=transaksi_detail_nota and transaksi_detail_barang_id=barang_id and barang_subkategori=subkategori_id and subkategori_parent=kategori_id and kategori_id='$id' and transaksi_bulan='$bln' GROUP BY barang_id ORDER BY jumlah DESC LIMIT 10";
+} elseif ($func=='text-dashboard') {
 
-} elseif ($func=='getkategori') {
+    $query = "SELECT SUM(pengukuran_total_harga) as total FROM pengukuran where pengukuran_bulan='$bln' and pengukuran_status NOT LIKE '%penawaran%' ";
 
-    $query = "SELECT * from kategori ORDER BY kategori_id ASC";
+} elseif ($func=='editjenis') {
+	$id = $_POST['jenis_id'];
+	$query = "SELECT * from jenis where jenis_id='$id'";
 
-} elseif ($func=='listproduk') {
-
-	$query = "SELECT barang_nama, subkategori_nama, barang_stok, barang_harga_beli, barang_harga_jual, barang_harga_jual_online FROM barang, subkategori, kategori where barang_subkategori=subkategori_id and subkategori_parent=kategori_id";
-
-} elseif ($func=='editproduk') {
-	$id = $_POST['produk_id'];
-	$query = "SELECT * from barang, subkategori where barang_subkategori=subkategori_id and barang_id='$id'";
-
-} elseif ($func=='select-subkategori') {
-    $kategori = $_POST['kategori'];
-
-	$query = "SELECT * FROM subkategori WHERE subkategori_parent='$kategori'";
-
-} elseif ($func=='select-barang') {
-    $subkategori = $_POST['subkategori'];
-    $cabang = $_POST['cabang'];
-    $role = $_POST['role'];
-
-    if ($role=='md') {
-        $query = "SELECT * FROM barang, barang_cabang WHERE barang_id=barang_cabang_barang_id AND barang_cabang_cabang_id='$cabang' AND barang_subkategori='$subkategori'";
-    } else {
-        $query = "SELECT * FROM barang WHERE barang_subkategori='$subkategori'";
-    }
-
-
-} elseif ($func=='listsubkategori') {
-
-    $query = "SELECT * FROM subkategori";
-
-} elseif ($func=='editsubkategori') {
-	$id = $_POST['subkategori_id'];
-	$query = "SELECT * from subkategori where subkategori_id='$id'";
-
-} elseif ($func=='editkategori') {
-    $id = $_POST['kategori_id'];
-    $query = "SELECT * from kategori where kategori_id='$id'";
+} elseif ($func=='editmodel') {
+    $id = $_POST['model_id'];
+    $query = "SELECT * from model where model_id='$id'";
 
 } elseif ($func=='edituser') {
 	$id = $_POST['id'];
-	$query = "SELECT * from users where id='$id'";
+	$query = "SELECT * from users_lain where id='$id'";
 
 } elseif ($func=='editmember') {
     $id = $_POST['id'];
-    $query = "SELECT * from member where member_id='$id'";
-
-} elseif ($func=='editcabang') {
-    $id = $_POST['id'];
-    $query = "SELECT * from cabang where cabang_id='$id'";
+    $query = "SELECT * from users_lain where id='$id'";
 
 } elseif ($func=='editsetting') {
 	$id = 1;
 	$query = "SELECT * from pengaturan_perusahaan where pengaturan_id='$id'";
 
-} elseif ($func=='editstok') {
-	$id = $_POST['id'];
+} elseif ($func=='laporan-nota') {
+       
+    $ket = "transaksi_tanggal"; 
+    $tgl11 = date("Y-m-j", strtotime($_POST['start']));
+    $tgl22 = date("Y-m-j", strtotime($_POST['end']));
+    
 
-    if ($role=='md') {
-        $query = "SELECT barang_nama, barang_cabang_stok as barang_stok, barang_cabang_batas_stok as barang_batas_stok, barang_cabang_id as barang_id FROM barang_cabang, barang WHERE barang_cabang_barang_id=barang_id and barang_cabang_cabang_id='$cabang' and barang_cabang_id='$id'";
-    } else {
-    	$query = "SELECT * from barang where barang_id='$id'";
-    }
-
-} elseif ($func=='list-order-temp') {
-    $query="SELECT * from order_detail_temp, barang, subkategori where order_detail_temp_barang_id=barang_id and subkategori_id=barang_subkategori and order_detail_temp_user='$user' ORDER BY order_detail_temp_id";
-} elseif ($func=='list-member-temp') {
-
-    $query="SELECT * from member_temp, member, users where  member_temp_member_id=member_id and member_temp_therapist=id and member_temp_user_id='$user' ORDER BY member_temp_id DESC LIMIT 1";
+    $query ="SELECT * from transaksi, users WHERE transaksi_user=id and transaksi_tanggal BETWEEN '$tgl11' AND '$tgl22'";
 
 } elseif ($func=='laporan-omset') {
-	
-    if ($_POST['daterange']=="harian") {
-        $ket = "orderbarang_tanggal"; 
-		$tgl11 = date("Y-m-j", strtotime($_POST['start']));
-	    $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-    } elseif ($_POST['daterange']=="bulanan") {
-        $ket = "orderbarang_bulan";     
-		$tgl11 = date("Y-m", strtotime($_POST['start']));
-	    $tgl22 = date("Y-m", strtotime($_POST['end']));
-    }
+    
+        $tgl1 = date("Y-m", strtotime($_POST['start']));
+        $tgl2 = date("Y-m", strtotime($_POST['end']));
 
-	$query ="SELECT orderbarang_tanggal, orderbarang_bulan, sum(orderbarang_total) as total from orderbarang WHERE $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket  ";
+    $query ="SELECT laporan_omset_bulan, sum(laporan_omset_jumlah) as total from laporan_omset where laporan_omset_bulan between '$tgl1' and '$tgl2' group by laporan_omset_bulan order by laporan_omset_bulan ASC";
+
+} elseif ($func=='detail-laporan') {
+	     
+	$bln = $_POST['bulan'];
+
+	$query ="SELECT * from pengukuran, users_lain, laporan_omset WHERE pengukuran_pelanggan=id and pengukuran_id=laporan_omset_pengukuran_id and laporan_omset_bulan='$bln' ";
 
 }  elseif ($func=='laporan-kasir') {
 	
@@ -132,516 +93,386 @@ if ($func=='dasboard-omset') {
 
 	$query ="SELECT transaksi_tanggal, transaksi_bulan, sum(transaksi_total) as total, sum(transaksi_diskon) as diskon, transaksi_user, id, name from transaksi, users WHERE transaksi_user=id and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket $text2 ";
 
-}  elseif ($func=='laporan-menu') {
-	
-    $kategori = $_POST['kategori'];
-    $subkategori = $_POST['subkategori'];
-    $menu = $_POST['menu'];
-    $role = $_POST['role'];
-    $cabang = $_POST['cabang'];
-    $cekcabang = $_POST['cekcabang'];
-    $cabangnama = $_POST['cabangnama'];
+} elseif ($func=='followup') {
+    $id = $_POST['booking_id'];
+    //$id = 955;
+    $query = "SELECT * from booking_pengukuran, users_lain where booking_pengukuran_pelanggan=id and booking_pengukuran_id='$id'";
 
-    if ($role=="md") {
-        
-        if ($kategori!=0 && $subkategori==0 && $menu==0) {
-            $text1 = 'kategori_id='.$kategori.' and ';
-            $text2 = ', barang_cabang_id';
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-            $text1 = 'subkategori_id='.$subkategori.' and ';
-            $text2 = ', barang_cabang_id';
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-            $text1 = 'barang_cabang_id='.$menu.' and ';
-            $text2 = '';
-        } else {
-            $text1 = '';
-            $text2 = ', barang_cabang_id';
-        }
+} elseif ($func=='detailpenawaran') {
+         
+    $id = $_POST['id'];
+    //$id = 638;
 
+    $query ="SELECT * from pengukuran, users_lain where pengukuran_pelanggan=id and pengukuran_id=$id ";
 
-        if ($_POST['daterange']=="harian") {
-            $ket = "order_keluar_tanggal"; 
-            $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-            $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-        } elseif ($_POST['daterange']=="bulanan") {
-            $ket = "order_keluar_bulan";     
-            $tgl11 = date("Y-m", strtotime($_POST['start']));
-            $tgl22 = date("Y-m", strtotime($_POST['end']));
-        }
+} elseif ($func=='hitungpenawaran') {
+         
+    $id = $_POST['id'];
+    //$id = 639;
 
+    $query ="SELECT * from pengukuran_detail, jenis, model, bahan where pengukuran_detail_jenis=jenis_id and pengukuran_detail_bahan=bahan_id and pengukuran_detail_model=model_id and pengukuran_id=$id ";
 
-        $query ="SELECT kategori_nama, subkategori_nama, order_keluar_tanggal, order_keluar_bulan, barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket $text2 ORDER BY order_keluar_tanggal ASC";
+} elseif ($func=='listpengukuran') {
+         
+    $id = $_POST['id'];
+    //$id = 638;
 
-    } elseif ($role=="admin" || $role=="administrator"  || $role=="keuangan") {
-        if ($cabangnama=="Pusat") {    
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = ', barang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = ', barang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_id='.$menu.' and ';
-                $text2 = '';
-            } else {
-                $text1 = '';
-                $text2 = ', barang_id';
-            }
+    $query ="SELECT * from pengukuran_detail, jenis, model, bahan where pengukuran_detail_jenis=jenis_id and pengukuran_detail_bahan=bahan_id and pengukuran_detail_model=model_id and pengukuran_id=$id ";
 
+} elseif ($func=='edititempenawaran') {
+    $id = $_POST['id'];
+    //$id = 638;
 
-            if ($_POST['daterange']=="harian") {
-                $ket = "orderbarang_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "orderbarang_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
-            
-            $query ="SELECT  kategori_nama, subkategori_nama, orderbarang_tanggal, orderbarang_bulan, barang_nama, barang_id, sum(order_detail_jumlah) as jumlah from orderbarang, order_detail, barang, kategori, subkategori WHERE order_detail_barang_id=barang_id and order_detail_no_pesan=orderbarang_no_pesan and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket $text2 ORDER BY orderbarang_tanggal ASC";
-        } else {
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = ', barang_cabang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = ', barang_cabang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_cabang_id='.$menu.' and ';
-                $text2 = '';
-            } else {
-                $text1 = '';
-                $text2 = ', barang_cabang_id';
-            }
+    $query ="SELECT * from pengukuran_detail, jenis, model, bahan where pengukuran_detail_jenis=jenis_id and pengukuran_detail_bahan=bahan_id and pengukuran_detail_model=model_id and pengukuran_detail_id=$id ";
 
+} elseif ($func=='orderbahan') {
+         
+    $id = $_POST['id'];
+    //$id = 631;
 
-            if ($_POST['daterange']=="harian") {
-                $ket = "order_keluar_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "order_keluar_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
+    $query ="SELECT * from pengukuran_detail, jenis, model, bahan where pengukuran_detail_jenis=jenis_id and pengukuran_detail_bahan=bahan_id and pengukuran_detail_model=model_id and pengukuran_id=$id ";
 
+} elseif ($func=='pemotongan') {
+         
+    $id = $_POST['id'];
+    //$id = 638;
 
-            $query ="SELECT  kategori_nama, subkategori_nama, order_keluar_tanggal as orderbarang_tanggal, order_keluar_bulan as orderbarang_bulan, barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cekcabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket $text2 ORDER BY order_keluar_tanggal ASC";
-        }
+    $query ="SELECT * from pengukuran_detail, jenis, model, bahan where pengukuran_detail_jenis=jenis_id and pengukuran_detail_bahan=bahan_id and pengukuran_detail_model=model_id and pengukuran_id=$id ";
 
-    }
+} elseif ($func=='cekmodel') {
+    $id = $_POST['idjenis'];
+    //$id = 8;
+    $query = "SELECT * from jenis where jenis_id='$id'";
 
-} elseif ($func=='laporan-menu-grafik') {
-    
-    $kategori = $_POST['kategori'];
-    $subkategori = $_POST['subkategori'];
-    $menu = $_POST['menu'];
-    $role = $_POST['role'];
-    $cabang = $_POST['cabang'];
-    $cekcabang = $_POST['cekcabang'];
-    $cabangnama = $_POST['cabangnama'];
+} elseif ($func=='detailorder') {
+    $query = "SELECT * FROM pengukuran_detail_temp, jenis where pengukuran_detail_temp_jenis=jenis_id and pengukuran_detail_temp_user='$user'";
 
-    if ($role=="md") {
-        
-        if ($kategori!=0 && $subkategori==0 && $menu==0) {
-            $text1 = 'kategori_id='.$kategori.' and ';
-            $text2 = 'barang_cabang_id';
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-            $text1 = 'subkategori_id='.$subkategori.' and ';
-            $text2 = 'barang_cabang_id';
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-            $text1 = 'barang_cabang_id='.$menu.' and ';
-            $text2 = 'barang_cabang_id';
-        } else {
-            $text1 = '';
-            $text2 = 'barang_cabang_id';
-        }
-
-
-        if ($_POST['daterange']=="harian") {
-            $ket = "order_keluar_tanggal"; 
-            $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-            $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-        } elseif ($_POST['daterange']=="bulanan") {
-            $ket = "order_keluar_bulan";     
-            $tgl11 = date("Y-m", strtotime($_POST['start']));
-            $tgl22 = date("Y-m", strtotime($_POST['end']));
-        }
-
-
-        $query ="SELECT barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-
-    } elseif ($role=="admin" || $role=="administrator"  || $role=="keuangan") {
-        if ($cabangnama=="Pusat") {
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = 'barang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = 'barang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_id='.$menu.' and ';
-                $text2 = 'barang_id';
-            } else {
-                $text1 = '';
-                $text2 = 'barang_id';
-            }
-
-
-            if ($_POST['daterange']=="harian") {
-                $ket = "orderbarang_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "orderbarang_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
-            
-            $query ="SELECT orderbarang_tanggal, orderbarang_bulan, barang_nama, barang_id, sum(order_detail_jumlah) as jumlah from orderbarang, order_detail, barang, kategori, subkategori WHERE order_detail_barang_id=barang_id and order_detail_no_pesan=orderbarang_no_pesan and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-        } else {
-
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = 'barang_cabang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = 'barang_cabang_id';
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_cabang_id='.$menu.' and ';
-                $text2 = 'barang_cabang_id';
-            } else {
-                $text1 = '';
-                $text2 = 'barang_cabang_id';
-            }
-
-
-            if ($_POST['daterange']=="harian") {
-                $ket = "order_keluar_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "order_keluar_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
-
-
-            $query ="SELECT barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cekcabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";    
-        }
-    }
-
-} elseif ($func=='laporan-menu-grafik-pie') {
-    
-    $kategori = $_POST['kategori'];
-    $subkategori = $_POST['subkategori'];
-    $menu = $_POST['menu'];
-    $role = $_POST['role'];
-    $cabang = $_POST['cabang'];
-    $cekcabang = $_POST['cekcabang'];
-    $cabangnama = $_POST['cabangnama'];
-    $orderby = $_POST['orderby'];
-    if ($role=="md") {
-        
-        if ($kategori!=0 && $subkategori==0 && $menu==0) {
-            $text1 = 'kategori_id='.$kategori.' and ';
-            $text2 = $orderby;
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-            $text1 = 'subkategori_id='.$subkategori.' and ';
-            $text2 = $orderby;
-        } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-            $text1 = 'barang_cabang_id='.$menu.' and ';
-            $text2 = $orderby;
-        } else {
-            $text1 = '';
-            $text2 = $orderby;
-        }
-
-
-        if ($_POST['daterange']=="harian") {
-            $ket = "order_keluar_tanggal"; 
-            $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-            $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-        } elseif ($_POST['daterange']=="bulanan") {
-            $ket = "order_keluar_bulan";     
-            $tgl11 = date("Y-m", strtotime($_POST['start']));
-            $tgl22 = date("Y-m", strtotime($_POST['end']));
-        }
-
-
-        $query ="SELECT kategori_nama, subkategori_nama, barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-
-    } elseif ($role=="admin" || $role=="administrator"  || $role=="keuangan") {
-        if ($cabangnama=="Pusat") {
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = $orderby;
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = $orderby;
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_id='.$menu.' and ';
-                $text2 = $orderby;
-            } else {
-                $text1 = '';
-                $text2 = $orderby;
-            }
-
-
-            if ($_POST['daterange']=="harian") {
-                $ket = "orderbarang_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "orderbarang_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
-            
-            $query ="SELECT kategori_nama, subkategori_nama, orderbarang_tanggal, orderbarang_bulan, barang_nama, barang_id, sum(order_detail_jumlah) as jumlah from orderbarang, order_detail, barang, kategori, subkategori WHERE order_detail_barang_id=barang_id and order_detail_no_pesan=orderbarang_no_pesan and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-        } else {
-
-            if ($kategori!=0 && $subkategori==0 && $menu==0) {
-                $text1 = 'kategori_id='.$kategori.' and ';
-                $text2 = $orderby;
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu==0) {
-                $text1 = 'subkategori_id='.$subkategori.' and ';
-                $text2 = $orderby;
-            } elseif ($kategori!=0 && $subkategori!=0 && $menu!=0) {
-                $text1 = 'barang_cabang_id='.$menu.' and ';
-                $text2 = $orderby;
-            } else {
-                $text1 = '';
-                $text2 = $orderby;
-            }
-
-
-            if ($_POST['daterange']=="harian") {
-                $ket = "order_keluar_tanggal"; 
-                $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-                $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-            } elseif ($_POST['daterange']=="bulanan") {
-                $ket = "order_keluar_bulan";     
-                $tgl11 = date("Y-m", strtotime($_POST['start']));
-                $tgl22 = date("Y-m", strtotime($_POST['end']));
-            }
-
-
-            $query ="SELECT kategori_nama, subkategori_nama, barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cekcabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";    
-        }
-    }
-
-}  elseif ($func=='laporan-menu-grafik-dashboard') {
-    
-    $role = $_POST['role'];
-    $cabang = $_POST['cabang'];
-
-    if ($role=="md") {
-        
-        $text1 = '';
-        $text2 = 'barang_cabang_id'; 
-
-        $ket = "order_keluar_bulan";     
-        $tgl11 = $bln;
-        $tgl22 = $bln;
-
-
-        $query ="SELECT barang_nama, barang_id, sum(order_keluar_jumlah) as jumlah from order_keluar, barang, barang_cabang, kategori, subkategori WHERE order_keluar_barang_id=barang_cabang_id and barang_id=barang_cabang_barang_id and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and barang_cabang_cabang_id='$cabang' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-
-    } elseif ($role=="admin" || $role=="administrator"  || $role=="keuangan") {
-        
-        $text1 = '';
-        $text2 = 'barang_id';
-        $ket = "orderbarang_bulan";     
-            
-        $tgl11 = $bln;
-        $tgl22 = $bln;
-        
-        $query ="SELECT orderbarang_tanggal, orderbarang_bulan, barang_nama, barang_id, sum(order_detail_jumlah) as jumlah from orderbarang, order_detail, barang, kategori, subkategori WHERE order_detail_barang_id=barang_id and order_detail_no_pesan=orderbarang_no_pesan and kategori_id=subkategori_parent and subkategori_id=barang_subkategori and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $text2 ORDER BY barang_id ASC";
-
-    }
-
-} elseif ($func=='laporan-nota') {
-       
-    $ket = "transaksi_tanggal"; 
-    $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-    $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-    
-
-    $query ="SELECT * from transaksi, users, member WHERE transaksi_member=member_id and transaksi_user=id and transaksi_tanggal BETWEEN '$tgl11' AND '$tgl22'  ";
-
-} elseif ($func=='cek-nota') {
-       
-    $nota = $_POST['notaid'];
-
-    $query ="SELECT * from transaksi_detail, barang where transaksi_detail_barang_id=barang_id and transaksi_detail_nota='$nota' ORDER BY transaksi_detail_id ASC";
-
-} elseif ($func=='detailpesanan') {
-       
-    $order_id = $_POST['order_id'];
-
-    $query ="SELECT * from order_detail, barang, subkategori where order_detail_barang_id=barang_id and barang_subkategori=subkategori_id and order_detail_no_pesan='$order_id' ORDER BY order_detail_id ASC";
-
-} elseif ($func=='laporan-stok') {
-    
-    $menu = $_POST['menu'];
-
-    if ($menu==0) {
-        $text1 = '';
-        $text2 = ', barang_id';
-    } else {
-        $text1 = 'barang_id='.$menu.' and ';
-        $text2 = '';
-
-    }
-
-        $ket = "tanggal"; 
-        $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-        $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-    
-
-    $query ="SELECT * from log_stok, barang, users WHERE log_stok.barang=barang_id and id=log_stok.user and keterangan='tambah' and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' ORDER BY tanggal ASC";
-
-}  elseif ($func=='laporan-stokkeluar') {
-    
-    $menu = $_POST['menu'];
-
-    if ($menu==0) {
-        $text1 = '';
-        $text2 = ', barang_id';
-    } else {
-        $text1 = 'barang_id='.$menu.' and ';
-        $text2 = '';
-
-    }
-    
-    $ket = "transaksi_tanggal"; 
-    $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-    $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-
-
-    $query ="SELECT name, transaksi_tanggal, barang_nama, barang_id, sum(transaksi_detail_jumlah) as jumlah from transaksi, transaksi_detail, barang, users WHERE transaksi_id=transaksi_detail_nota and transaksi_detail_barang_id=barang_id and transaksi_user=users.id and barang_set_stok=1 and $text1 $ket BETWEEN '$tgl11' AND '$tgl22' GROUP BY $ket $text2 , users.id ORDER BY transaksi_tanggal ASC";
-
-}  elseif ($func=='laporan-validasi') {
-
-    $tgl11 = date("Y-m-j", strtotime($_POST['start']));
-    $tgl22 = date("Y-m-j", strtotime($_POST['end']));
-
-    $query="SELECT * from  validasi WHERE validasi_tanggal BETWEEN '$tgl11' AND '$tgl22' ORDER BY validasi_id asc";
 }
 
 
 $result = mysqli_query($con,$query);
 $array_data = array();
-/*
-if ($func=="laporan-omset" || $func=="laporan-kasir") {
-	
-	if ($_POST['daterange']=="harian") {
-        $ket = "transaksi_tanggal"; 
-    } elseif ($_POST['daterange']=="bulanan") {
-        $ket = "transaksi_bulan";     
+$array_data1 = array();
+
+if ($func=="text-dashboard") {
+
+    $sql1="SELECT SUM(pengukuran_total_harga) AS total_harga, SUM(pengukuran_pelunasan) AS pelunasan, COUNT(pengukuran_id) AS jml FROM pengukuran WHERE pengukuran_bulan='$bln' and pengukuran_status NOT LIKE '%penawaran%' ";
+    $query1=mysqli_query($con,$sql1);
+    $data1=mysqli_fetch_assoc($query1);
+
+    $sql2="SELECT SUM(pengukuran_detail_jumlah) AS jumlah_barang FROM pengukuran, pengukuran_detail WHERE pengukuran.pengukuran_id=pengukuran_detail.pengukuran_id and pengukuran_bulan='$bln' and pengukuran_status NOT LIKE '%penawaran%' ";
+    $query2=mysqli_query($con,$sql2);
+    $data2=mysqli_fetch_assoc($query2);
+
+
+    $sql3 = "SELECT SUM(laporan_omset_jumlah) as uang_masuk from laporan_omset where laporan_omset_bulan='$bln'";
+    $query3=mysqli_query($con,$sql3);
+    $data3=mysqli_fetch_assoc($query3);
+
+    $total_harga = 0;
+    $uang_masuk = 0;
+    $jml = 0;
+    $jumlah_barang = 0;
+
+    if ($data1['total_harga']!='' || $data1['total_harga']!=NULL) {
+        $total_harga = $data1['total_harga'];
+    }
+    if ($data3['uang_masuk']!='' || $data3['uang_masuk']!=NULL) {
+        $uang_masuk = $data3['uang_masuk'];
+    }
+    if ($data1['jml']!='' || $data1['jml']!=NULL) {
+        $jml = $data1['jml'];
+    }
+    if ($data2['jumlah_barang']!='' || $data2['jumlah_barang']!=NULL) {
+        $jumlah_barang = $data2['jumlah_barang'];
+    }
+
+    $row_array['total_harga'] = $total_harga;
+    $row_array['uang_masuk'] = $uang_masuk;
+    $row_array['jml'] = $jml;
+    $row_array['jumlah_barang'] = $jumlah_barang;
+    array_push($array_data,$row_array);
+    while($data = mysqli_fetch_assoc($result))
+    {
+        $array_data[]=$data;
+    }
+
+} elseif ($func=="followup") {
+
+    while($data = mysqli_fetch_assoc($result)) {
+
+        $sql1="SELECT * from users_lain where id='$data[booking_pengukuran_user]'";
+        $query1=mysqli_query($con,$sql1);
+        $data1=mysqli_fetch_assoc($query1);
+
+        $sql2="SELECT * from pengukuran where pengukuran_pelanggan='$data[booking_pengukuran_pelanggan]'";
+        $query2=mysqli_query($con,$sql2);
+        $data2=mysqli_fetch_assoc($query2);
+
+        $row_array['booking_pengukuran_tanggal_booking'] = $data['booking_pengukuran_tanggal_booking'];
+        $row_array['name'] = $data['name'];
+        $row_array['alamat'] = $data['alamat'];
+        $row_array['telepon'] = $data['telepon'];
+        $row_array['booking_pengukuran_status'] = $data['booking_pengukuran_status'];
+        $row_array['booking_pengukuran_id'] = $data['booking_pengukuran_id'];
+        $row_array['booking_pengukuran_pelanggan'] = $data['booking_pengukuran_pelanggan'];
+        $row_array['petugas'] = $data1["name"];
+        $row_array['pdf_id_ukur'] = $data2['pengukuran_id'];
+        array_push($array_data,$row_array);
+
+    }
+} elseif ($func=="cekmodel") {
+    $arrayjenismodel = array();
+    $arrayjenisbahan = array();
+    $arraymodelnama = array();
+    $arraymodelid = array();
+    $arraybahannama = array();
+    $arraybahanid = array();
+    while($data = mysqli_fetch_assoc($result)) {
+        if ($data["jenis_ket_model"]==1) {
+            $arrayjenismodel = explode(":",$data["jenis_listmodel"]);
+            
+            for ($i=0; $i < count($arrayjenismodel); $i++) { 
+                $sql1="SELECT * from model where model_id='$arrayjenismodel[$i]'";
+                $query1=mysqli_query($con,$sql1);
+                $data1=mysqli_fetch_assoc($query1);
+                $arraymodelnama[$i] = $data1['model_nama'];
+                $arraymodelid[$i] = $data1['model_id'];
+            
+            }
+            $row_array['namamodel'] = $arraymodelnama;
+            $row_array['idmodel'] = $arraymodelid;
+            $row_array['lengthdata'] = count($arrayjenismodel);
+            
+        } else {
+            $row_array['namamodel'] = '';
+            $row_array['idmodel'] = '';
+            $row_array['lengthdata'] = 0;
+
+        }
+
+        $arrayjenisbahan = explode(":",$data["jenis_listkain"]);
+        
+        if ($data["jenis_listkain"]!='') {
+            for ($i=0; $i < count($arrayjenisbahan); $i++) { 
+                $sql2="SELECT * from bahan where bahan_id='$arrayjenisbahan[$i]'";
+                $query2=mysqli_query($con,$sql2);
+                $data2=mysqli_fetch_assoc($query2);
+                $arraybahannama[$i] = $data2['bahan_nama'];
+                $arraybahanid[$i] = $data2['bahan_id'];
+            
+            }
+            $row_array['namabahan'] = $arraybahannama;
+            $row_array['idbahan'] = $arraybahanid;
+            $row_array['lengthdatabahan'] = count($arrayjenisbahan);
+        } else {
+            $row_array['namabahan'] = '';
+            $row_array['idbahan'] = '';
+            $row_array['lengthdatabahan'] = 0;
+
+        }
+        array_push($array_data,$row_array);
+        
+
+    }
+} elseif ($func=="detailorder") {
+
+    $sql1="SELECT * FROM users_lain, pelanggan_temp WHERE pelanggan_temp_id_pelanggan=id and pelanggan_temp_user='$user' ";
+    $query1=mysqli_query($con,$sql1);
+    $data1=mysqli_fetch_assoc($query1);
+
+    $row_array['nama'] = $data1['name'];
+    $row_array['alamat'] = $data1['alamat'];
+    array_push($array_data,$row_array);
+    while($data = mysqli_fetch_assoc($result))
+    {
+        $array_data[]=$data;
+    }
+
+} elseif ($func=="hitungpenawaran") {
+    $totalpremium = 0;
+    $totalgold = 0;
+    $totalsilver = 0;
+    while($data = mysqli_fetch_assoc($result)) {
+        $jenis = $data['pengukuran_detail_jenis'];
+        $namajenis = $data['jenis_nama'];
+        $model = $data['pengukuran_detail_model'];
+        $namamodel = $data['model_nama'];
+        $bahan = $data['pengukuran_detail_bahan'];
+        $namabahan = $data['bahan_nama'];
+        $tinggi = $data['pengukuran_detail_tinggi'];
+        $lebar = $data['pengukuran_detail_lebar'];
+        $volume = $data['pengukuran_detail_volume'];
+        $jumlah = $data['pengukuran_detail_jumlah'];
+        $hargabahan = $data['pengukuran_detail_harga_bahan'];
+        $hargabox = $data['pengukuran_detail_harga_box'];
+        
+        $pilihkualitaspremium = "Premium";
+        $hasilhitungharga = hitungHarga($jenis,$namajenis,$model,$namamodel,$bahan,$namabahan,$tinggi,$lebar,$volume,$jumlah,$hargabahan,$hargabox,$pilihkualitaspremium);
+
+        $totalpremium += $hasilhitungharga;
+
+        $pilihkualitasgold = "Gold";
+        $hasilhitunghargagold = hitungHarga($jenis,$namajenis,$model,$namamodel,$bahan,$namabahan,$tinggi,$lebar,$volume,$jumlah,$hargabahan,$hargabox,$pilihkualitasgold);
+
+        $totalgold += $hasilhitunghargagold;
+
+        $pilihkualitassilver = "Silver";
+        $hasilhitunghargasilver = hitungHarga($jenis,$namajenis,$model,$namamodel,$bahan,$namabahan,$tinggi,$lebar,$volume,$jumlah,$hargabahan,$hargabox,$pilihkualitassilver);
+
+        $totalsilver += $hasilhitunghargasilver;
+    }
+
+    $row_array['totalpremium'] = $totalpremium;
+    $row_array['totalgold'] = $totalgold;
+    $row_array['totalsilver'] = $totalsilver;
+    array_push($array_data,$row_array);
+
+} elseif ($func=="orderbahan") {
+    $id = $_POST['id'];
+    //$id=631;
+
+    $sql1="SELECT * FROM pengukuran, users_lain where pengukuran_pelanggan=id and pengukuran_id=$id ";
+    $query1=mysqli_query($con,$sql1);
+    $data1=mysqli_fetch_assoc($query1);
+
+    $row_array['idp'] = $id;
+    $row_array['nama'] = $data1['name'];
+    $row_array['alamat'] = $data1['alamat'];
+    $row_array['telepon'] = $data1['telepon'];
+    $row_array['status'] = $data1['pengukuran_status'];
+    $row_array['kualitas'] = $data1['pengukuran_kualitas'];
+
+    //array_push($array_data,$row_array);
+
+    $q= "SELECT * FROM pengaturan_perusahaan where pengaturan_id='1'";
+    $r=mysqli_query($con, $q);
+    $d=mysqli_fetch_assoc($r);
+
+    $row_array['premium'] = $d['pengaturan_kualitas_premium'];
+    $row_array['gold'] = $d['pengaturan_kualitas_gold'];
+    $row_array['silver'] = $d['pengaturan_kualitas_silver'];
+    $row_array['vitraspremium'] = $d['pengaturan_kualitas_vitras_premium'];
+    $row_array['vitrasgold'] = $d['pengaturan_kualitas_vitras_gold'];
+    $row_array['vitrassilver'] = $d['pengaturan_kualitas_vitras_silver'];
+
+    array_push($array_data,$row_array);
+
+
+    while($data = mysqli_fetch_assoc($result))
+    {
+        $array_data['listbarang'][]=$data;
+    }
+
+    $sql2="SELECT pengukuran_detail_kode_bahan, jenis_nama from pengukuran_detail,jenis where pengukuran_detail_jenis=jenis_id and pengukuran_id='$id' GROUP BY pengukuran_detail_kode_bahan ";
+    $query2=mysqli_query($con,$sql2);
+    while($data2 = mysqli_fetch_assoc($query2))
+    {
+        if ($data2['pengukuran_detail_kode_bahan']!='') {
+            $array_data['kodebahan'][]=$data2;
+        }
     }
     
-    //$ket = "transaksi_tanggal";
-	while($data = mysqli_fetch_assoc($result))
-	{
-		if ($func=="laporan-kasir") {
-	        $text = 'transaksi_user='.$data['id'].' and ';
-            $text1 = '';
-	    } else {
-	    	$text = '';
-            $text1 = '';
-	    }
-
-		$tglket = $data[$ket];
-        $sqlcash="SELECT sum(transaksi_total) as total from transaksi WHERE $text $ket='$tglket' and transaksi_type_bayar='Cash' GROUP BY $ket $text1 ";
-        $querycash=mysqli_query($con, $sqlcash);
-        $datacash=mysqli_fetch_assoc($querycash);
-        $totalcash = 0;
-        if ($datacash['total']!='') {
-            $totalcash = $datacash['total'];
-        }
-		
-        $sqlonline="SELECT sum(transaksi_total) as total from transaksi WHERE $text $ket='$tglket' and transaksi_type_bayar='GoResto' GROUP BY $ket $text1 ";
-        $queryonline=mysqli_query($con, $sqlonline);
-        $dataonline=mysqli_fetch_assoc($queryonline);
-        $totalonline = 0;
-        if ($dataonline['total']!='') {
-            $totalonline = $dataonline['total'];
-        }
-
-        $sqldebet="SELECT sum(transaksi_total) as total from transaksi WHERE $text $ket='$tglket' and transaksi_type_bayar='Debet' GROUP BY $ket $text1 ";
-        $querydebet=mysqli_query($con, $sqldebet);
-        $datadebet=mysqli_fetch_assoc($querydebet);
-        $totaldebet = 0;
-        if ($datadebet['total']!='') {
-            $totaldebet = $datadebet['total'];
-        }
-        
-	  //$array_data[]=($ket=>$data[$ket], 'cash'=>$totalcash, 'debet'=>$totaldebet, 'online'=>$totalonline);
-        if ($func=="laporan-kasir") {
-			$row_array['kasir'] = $data['name'];
-        }
-		$row_array[$ket] = $data[$ket];
-	    $row_array['cash'] = $totalcash;
-	    $row_array['debet'] = $totaldebet;
-	    $row_array['online'] = $totalonline;
-		$row_array['total'] = $data['total'];
-        array_push($array_data,$row_array);
-	}
-
-} else */
-if ($func=="cek-nota") {
-
-    $nota = $_POST['notaid'];
-    $sqlnot="SELECT * FROM transaksi, users, member where transaksi_member=member_id and transaksi_user=id and transaksi_id='$nota' ";
-    $querynot=mysqli_query($con,$sqlnot);
-    $datanot=mysqli_fetch_assoc($querynot);
-
-    $total = $datanot['transaksi_total'];
-    $pelanggan = $datanot['member_nama'];
-    $therapist = $datanot['transaksi_therapist'];
-    $diskon = $datanot['transaksi_diskon'];
-    $user = $datanot['name'];
-
-    $sqlt="SELECT * FROM users where id='$therapist' ";
-    $queryt=mysqli_query($con,$sqlt);
-    $datat=mysqli_fetch_assoc($queryt);
-    $namatherapist = $datat['name'];
-
-    $row_array['subtotal'] = $total+$diskon;
-    $row_array['total'] = $total;
-    $row_array['pelanggan'] = $pelanggan;
-    $row_array['user'] = $user;
-    $row_array['therapist'] = $namatherapist;
-    $row_array['potongan'] = $diskon;
-    $row_array['notaid'] = $nota;
-    array_push($array_data,$row_array);
-    while($data = mysqli_fetch_assoc($result))
+    $sql3="SELECT pengukuran_detail_kode_bahan_1, jenis_nama from pengukuran_detail,jenis where pengukuran_detail_jenis=jenis_id and pengukuran_id='$id' GROUP BY pengukuran_detail_kode_bahan_1 ";
+    $query3=mysqli_query($con,$sql3);
+    while($data3 = mysqli_fetch_assoc($query3))
     {
-        $array_data[]=$data;
+        if ($data3['pengukuran_detail_kode_bahan_1']!='') {
+            $array_data['kodebahan1'][]=$data3;
+        }
+    }
+    
+    $sql4="SELECT pengukuran_detail_id, order_bahan_jumlah_kode_bahan_1, order_bahan_jumlah_kode_bahan_2, order_bahan_kode_bahan_1, order_bahan_kode_bahan_2 from pengukuran_detail,order_bahan where pengukuran_detail_id=order_bahan_detail_pengukuran_id and pengukuran_id='$id' ";
+    $query4=mysqli_query($con,$sql4);
+    while($data4 = mysqli_fetch_assoc($query4))
+    {
+        $array_data['orderbahanid'][]=$data4;
     }
 
-} elseif ($func=="detailpesanan") {
+    $sql5="SELECT sum(order_bahan_jumlah_kode_bahan_1) as jumlah, order_bahan_kode_bahan_1 as kode_bahan from pengukuran_detail,order_bahan where pengukuran_detail_id=order_bahan_detail_pengukuran_id and pengukuran_id='$id' GROUP BY order_bahan_kode_bahan_1 ";
+    $query5=mysqli_query($con,$sql5);
+    while($data5 = mysqli_fetch_assoc($query5))
+    {
+        $array_data['dataorderbahan'][]=$data5;
+    }
 
-    $nota = $_POST['order_id'];
-    $sqlnot="SELECT * FROM orderbarang, users, cabang where orderbarang_user_pesan=id and users.cabang=cabang_id and orderbarang_no_pesan='$nota' ";
-    $querynot=mysqli_query($con,$sqlnot);
-    $datanot=mysqli_fetch_assoc($querynot);
+    $sql6="SELECT sum(order_bahan_jumlah_kode_bahan_2) as jumlah, order_bahan_kode_bahan_2 as kode_bahan from pengukuran_detail,order_bahan where pengukuran_detail_id=order_bahan_detail_pengukuran_id and pengukuran_id='$id' GROUP BY order_bahan_kode_bahan_2 ";
+    $query6=mysqli_query($con,$sql6);
+    while($data6 = mysqli_fetch_assoc($query6))
+    {
+        $array_data['dataorderbahan'][]=$data6;
+    }
 
-    $row_array['idpesanan'] = $datanot['orderbarang_id'];
-    $row_array['tanggal'] = $datanot['orderbarang_tanggal'];
-    $row_array['waktu'] = $datanot['orderbarang_waktu'];
-    $row_array['status'] = $datanot['orderbarang_status'];
-    $row_array['ttd'] = $datanot['orderbarang_ttd'];
-    $row_array['user'] = $datanot['name'];
-    $row_array['cabang'] = $datanot['cabang_nama'];
-    $row_array['notaid'] = $nota;
+    $sql7="SELECT sum(order_bahan_jumlah_rel_alat_1) as jumlah, order_bahan_rel_alat_1 as alat from pengukuran_detail,order_bahan where pengukuran_detail_id=order_bahan_detail_pengukuran_id and pengukuran_id='$id' GROUP BY order_bahan_rel_alat_1 ";
+    $query7=mysqli_query($con,$sql7);
+    while($data7 = mysqli_fetch_assoc($query7))
+    {
+        $array_data['dataorderrel'][]=$data7;
+    }
+
+    $sql8="SELECT sum(order_bahan_jumlah_rel_alat_2) as jumlah, order_bahan_rel_alat_2 as alat from pengukuran_detail,order_bahan where pengukuran_detail_id=order_bahan_detail_pengukuran_id and pengukuran_id='$id' GROUP BY order_bahan_rel_alat_2 ";
+    $query8=mysqli_query($con,$sql8);
+    while($data8 = mysqli_fetch_assoc($query8))
+    {
+        $array_data['dataorderrel1'][]=$data8;
+    }
+
+}elseif ($func=="pemotongan") {
+    $id = $_POST['id'];
+    //$id=638;
+
+    $sql1="SELECT * FROM pengukuran, users_lain where pengukuran_pelanggan=id and pengukuran_id=$id ";
+    $query1=mysqli_query($con,$sql1);
+    $data1=mysqli_fetch_assoc($query1);
+
+    $totalharga = $data1['pengukuran_total_harga'];
+    $dp = $data1['pengukuran_dp_awal'];
+    $diskon = $data1['pengukuran_diskon'];
+    $sisa = $totalharga - $dp;
+
+
+    $sql2="SELECT * FROM pengaturan_perusahaan where pengaturan_id=1 ";
+    $query2=mysqli_query($con,$sql2);
+    $d=mysqli_fetch_assoc($query2);
+
+    $pilihkualitas = $data1['pengukuran_kualitas'];;
+    if ($pilihkualitas=="Premium") {
+        $kualitas = $d['pengaturan_kualitas_premium'];
+        $kualitas_vitras = $d['pengaturan_kualitas_vitras_premium'];
+    } elseif ($pilihkualitas=="Gold") {
+        $kualitas = $d['pengaturan_kualitas_gold'];
+        $kualitas_vitras = $d['pengaturan_kualitas_vitras_gold'];
+
+    } else {
+        $kualitas = $d['pengaturan_kualitas_silver'];
+        $kualitas_vitras = $d['pengaturan_kualitas_vitras_silver'];
+
+    }
+
+    $row_array['id'] = $id;
+    $row_array['harga'] = $totalharga;
+    $row_array['dp'] = $dp;
+    $row_array['diskon'] = $diskon;
+    $row_array['sisa'] = $sisa;
+    $row_array['nama'] = $data1['name'];
+    $row_array['alamat'] = $data1['alamat'];
+    $row_array['telepon'] = $data1['telepon'];
+    $row_array['status'] = $data1['pengukuran_status'];
+    $row_array['kualitas'] = $data1['pengukuran_kualitas'];
+    $row_array['kualitaskali'] = $kualitas;
+    $row_array['kualitaskalivitras'] = $kualitas_vitras;
+    $row_array['catatanpotong'] = $data1['pengukuran_keterangan'];
+    $row_array['catatanjahit'] = $data1['pengukuran_catatan_jahit'];
+    $row_array['ppn'] = $data1['pengukuran_ppn_jumlah'];
+    $row_array['konfirmasi'] = $data1['pengukuran_konfirmasi'];
+    $row_array['tglselesai'] = date('d-m-Y', strtotime($data1['pengukuran_tanggal_deal'] . ' +10 day'));
+
     array_push($array_data,$row_array);
+
+
     while($data = mysqli_fetch_assoc($result))
     {
-        $array_data[]=$data;
+        $array_data['listbarang'][]=$data;
     }
 
 } else {
@@ -651,14 +482,7 @@ if ($func=="cek-nota") {
 	}
 }
 
-if ($func=='listproduk') {
-	$array_datas = array();
-	$array_datas['data'] = $array_data;
-	echo json_encode($array_datas);
-} else {
-
-	echo json_encode($array_data);
-}
+echo json_encode($array_data);
 
 ?>
 

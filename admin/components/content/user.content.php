@@ -7,7 +7,6 @@
                 <th>nama</th>
                 <th>username</th>
                 <th>role</th>
-                <th>cabang</th>
                 <th></th>
             </tr>
         </thead>
@@ -24,7 +23,6 @@
             $("#modaluser #defaultForm-user").val('');
             $("#modaluser #defaultForm-password").val('');
             $("#modaluser #defaultForm-roles").val('');
-            $("#modaluser #defaultForm-cabang").val('');
             $("#modaluser #submit-user").removeClass('hidden');
             $("#modaluser #update-user").addClass('hidden');
             $("#modaluser #submit-user").removeAttr("disabled").button('refresh');
@@ -44,8 +42,7 @@
             "columns": [
                 { "data": "name" },
                 { "data": "username" },
-                { "data": "display_name" },
-                { "data": "cabang_nama" },
+                { "data": "roles_display" },
 
                 { "width": "180px", "render": function(data, type, full){
                     if ($("#defaultForm-role").val()=='administrator') {
@@ -102,7 +99,6 @@
                           $("#modaluser #defaultForm-user").val(data[0].username);
                           $("#modaluser #defaultForm-password").val('');
                           $("#modaluser #defaultForm-roles").val(data[0].role);
-                          $("#modaluser #defaultForm-cabang").val(data[0].cabang);
 
                       }
                   });

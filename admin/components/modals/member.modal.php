@@ -1,3 +1,9 @@
+<?php 
+$con = mysqli_connect("localhost","root","","yumindon_new"); 
+$sql="SELECT * from roles_lain where roles_nama LIKE '%pelanggan%'";
+$result=mysqli_query($con,$sql);
+$data1=mysqli_fetch_assoc($result);
+?>
 <!-------------- Modal member -------------->
 
 <div class="modal fade" id="modalmember" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -12,7 +18,7 @@
       <form method="post" class="form-member">
         <div class="modal-body mx-3">
             <input type="hidden" id="defaultForm-id" name="ip-id">
-            <input type="hidden" id="defaultForm-no" name="ip-no">
+            <input type="hidden" id="defaultForm-role" name="ip-role" value="<?php echo $data1['roles_id']; ?>">
             <div class="md-form mb-0">
               <input type="text" id="defaultForm-nama" class="form-control validate mb-3" name="ip-nama">
               <label for="defaultForm-nama">Nama</label>
@@ -22,18 +28,12 @@
               <label for="defaultForm-alamat">Alamat</label>
             </div>
             <div class="md-form mb-0">
-              <input placeholder="Tanggal Lahir" type="text" id="defaultForm-tgl-lahir" class="form-control datepicker" name="ip-tgl-lahir">
-            </div>
-            <div class="md-form mb-0">
               <input type="text" id="defaultForm-hp" class="form-control validate mb-3" name="ip-hp">
               <label for="defaultForm-hp">No. HP</label>
             </div>
             <div class="md-form mb-0">
-                <select class="mdb-select md-form" id="defaultForm-gender" name="ip-gender">
-                    <option value="" disabled selected>Pilih Gender</option>
-                    <option value="Perempuan">Perempuan</option>
-                    <option value="Laki-laki">Laki-laki</option>
-                </select>
+              <input type="email" id="defaultForm-email" class="form-control validate mb-3" name="ip-email">
+              <label for="defaultForm-email">Email</label>
             </div>
         </div>
         <div class="modal-footer d-flex justify-content-center">
